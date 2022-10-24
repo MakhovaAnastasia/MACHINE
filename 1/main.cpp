@@ -40,13 +40,20 @@ int main()
 
 double norma(double* A, double*b)
 {
-    stroka
     for( int i = 0; i < N; i++)
     {
         for(int j =  0; j< N; j++)
         {
-            x[i]
+            x[i]+=A[i*N + j];
         }
     }
-    return;
+    int max = x[0];
+    for( int i = 1; i < N; i++)
+    {
+        if(max <= x[i])
+        {
+            max = x[i];
+        }
+    }
+    return max;
 }
