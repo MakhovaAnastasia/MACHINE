@@ -98,3 +98,24 @@ int Read_from_file(double*A, int N, string FileName)
     }
     return 0;
 }
+
+int PrintMatrix(double* M, int l, int n, int m)
+{
+    if(l>m)
+    {
+        l = m;
+    }
+    if(n>m)
+    {
+        n = m;
+    }
+    for(int i = 0; i < l; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            cout<<" %10.3e"<<M[i*l+n]; 
+        }
+        cout<<endl;
+    } 
+    cout<<endl;
+}
