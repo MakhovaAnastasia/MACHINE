@@ -21,14 +21,10 @@ int main()
     int m = -1; //размер вывода
     int k = -1; // формула
     cin>>n>>m>>k;
-
+    cout<<k<<endl;
     if(k == 0)
     {
-        if(!getline(cin, filename))
-        {
-            cout<<"-2"<<endl;
-            return 0;
-        }
+        cin>>filename;
     }
 
     A = (double*) malloc(sizeof(double)*n*n);
@@ -37,7 +33,14 @@ int main()
     x_real = (double*) malloc(sizeof(double)*n);
 
     
-    ReadMatrix(A,n,k, filename);
+    if(ReadMatrix(A,n,k, filename)!=0)
+    {
+        free(A);
+        free(b);
+        free(x);
+        free(x_real);
+        return 0;
+    }
 
     for(int i = 0; i < n; i++)
     {
@@ -65,6 +68,10 @@ int main()
     PrintMatrix(x, 1, n, m);
     PrintMatrix(A, n, n, m);
 
+    free(A);
+    free(b);
+    free(x);
+    free(x_real);
     return 0;
 }
 
@@ -92,7 +99,7 @@ double norma_nevyaski(double* A, double*b, double* x, int N)
         sum = 0;
     }
     max/= b_max; //норма
-    cout<< "норма невязки: "<<scientific << max<< endl; 
+    cout<< "норма невязки: "<<max<< endl; 
     return max;
 }
 
@@ -106,7 +113,6 @@ double norma_pogreshnosty(double* x,double* x_real, int N)
             norma = abs(x[i] - x_real[i]);
         }
     }
-    cout<< "норма погрешности: "<<scientific << norma<< endl; 
+    cout<< "норма погрешности: "<< norma<< endl; 
     return norma;
-
 }

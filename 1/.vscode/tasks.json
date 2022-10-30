@@ -1,0 +1,27 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "C/C++: g++ сборка активного файла",
+			"command": "make",
+			"args": [
+				"--makefile=${fileDirname}/Makefile",
+				"-C",
+				"${fileDirname}",
+				"CallfromVSCode=1"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "компилятор: /bin/g++"
+		}
+	]
+}

@@ -1,4 +1,5 @@
 #include "Solve.h"
+#include "ReadMatrix.h"
 
 int Solve(int n,double* A,double* b,double* x)
 {
@@ -8,7 +9,9 @@ int Solve(int n,double* A,double* b,double* x)
         for(int j = n-1; j > i-1; j--)
         {
             TA(i,j, A, n); //Tij*A
+            PrintMatrix(A, n, n, n);
             Tb(i,j,b, n); //Tij*b
+            PrintMatrix(b, 1, n, n);
         }
     }
     // обратный ход метода Гаусса

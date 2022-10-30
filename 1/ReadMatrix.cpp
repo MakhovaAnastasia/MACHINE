@@ -24,7 +24,7 @@ int Read_by_func(double* A, int N, int K)
                     A[i+(N*j)] = N- max(i,j)+1;
                 }
             } 
-            return K;      
+            return 03;      
             break;
 
         case(2):
@@ -35,7 +35,7 @@ int Read_by_func(double* A, int N, int K)
                     A[i+(N*j)] = max(i,j);
                 }
             } 
-            return K;
+            return 0;
             break;
 
         case(3):
@@ -46,7 +46,7 @@ int Read_by_func(double* A, int N, int K)
                     A[i+(N*j)] = abs(i-j);
                 }
             }
-            return K;
+            return 0;
             break;
 
         case(4):
@@ -57,7 +57,7 @@ int Read_by_func(double* A, int N, int K)
                     A[i+(N*j)] = 1/(i+j-1);
                 }
             }
-            return K;
+            return 0;
             break;
 
         default:    //error
@@ -70,12 +70,12 @@ int Read_by_func(double* A, int N, int K)
 
 int Read_from_file(double*A, int N, string FileName)
 {
-    double new_number;
+    double new_number = 0;
     int count_num = 0;
     ifstream in(FileName);
     if(in.is_open())
     {
-        while((!in.eof())|| (count_num >= N*N))
+        while((!in.eof())&&(count_num <= N*N))
         {
             in>>new_number;
             A[count_num] = new_number;
@@ -83,17 +83,20 @@ int Read_from_file(double*A, int N, string FileName)
         }
         if (count_num < N*N)
         {
+            cout<<"недостаточно данных"<<endl;
             //меньшее число элементов
             return -11;
         }
         
     }
     else{
+        cout<<"ошибка при открытии файла"<<endl;
         return -10; //ошибка при открытии файла
     }
     in.close();
     if(in.fail())
     {
+        cout<<"ошибка при закрытии файла"<<endl;
         return -12; //ошибка при закрытии
     }
     return 0;
@@ -113,9 +116,10 @@ int PrintMatrix(double* M, int l, int n, int m)
     {
         for(int j = 0; j < n; j++)
         {
-            cout<<" %10.3e"<<M[i*l+n]; 
+            cout<<" "<<M[i*l+j]; 
         }
         cout<<endl;
     } 
     cout<<endl;
+    return 1;
 }
