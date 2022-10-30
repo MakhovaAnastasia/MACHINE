@@ -4,7 +4,6 @@
 #include <cmath>
 #include <ctime>
 
-#define EPS 0.0001 //погрешность сравнения double
 double norma_nevyaski(double* A, double*b, double* x, int N);
 double norma_pogreshnosty(double* x,double* x_real, int N);
 
@@ -21,7 +20,6 @@ int main()
     int m = -1; //размер вывода
     int k = -1; // формула
     cin>>n>>m>>k;
-    cout<<k<<endl;
     if(k == 0)
     {
         cin>>filename;
@@ -56,7 +54,7 @@ int main()
     PrintMatrix(x, 1, n, m);
 
     int start = clock();
-    Solve(n, A, b, x);
+    int res = Solve(n, A, b, x);
     int end = clock(); 
     int time = (end - start)/CLOCKS_PER_SEC;// время работы  в секундах
     cout<<"время работы: "<<time<<endl;
@@ -99,7 +97,7 @@ double norma_nevyaski(double* A, double*b, double* x, int N)
         sum = 0;
     }
     max/= b_max; //норма
-    cout<< "норма невязки: "<<max<< endl; 
+    cout<< "норма невязки: "<<scientific<<max<< endl; 
     return max;
 }
 
@@ -113,6 +111,6 @@ double norma_pogreshnosty(double* x,double* x_real, int N)
             norma = abs(x[i] - x_real[i]);
         }
     }
-    cout<< "норма погрешности: "<< norma<< endl; 
+    cout<< "норма погрешности: "<<scientific<< norma<< endl; 
     return norma;
 }

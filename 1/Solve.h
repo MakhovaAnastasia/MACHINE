@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <cmath>
 
+#define EPS 0.0001 //погрешность сравнения double
+
 int Solve(int n,double* A,double* b,double* x);
-int TA(int i, int j, double* A, int n);
-int Tb(int i, int j, double* b, int n);
+int TA(int i, int j, double* A,double* b, int n);

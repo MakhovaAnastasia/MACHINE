@@ -21,10 +21,10 @@ int Read_by_func(double* A, int N, int K)
             {
                 for(int j = 0; j < N; j++)
                 {
-                    A[i+(N*j)] = N- max(i,j)+1;
+                    A[(N*i)+j] = N- max(i,j)+1;
                 }
             } 
-            return 03;      
+            return 0;      
             break;
 
         case(2):
@@ -32,7 +32,7 @@ int Read_by_func(double* A, int N, int K)
             {
                 for(int j = 0; j < N; j++)
                 {
-                    A[i+(N*j)] = max(i,j);
+                    A[(N*i)+j] = max(i,j);
                 }
             } 
             return 0;
@@ -43,7 +43,7 @@ int Read_by_func(double* A, int N, int K)
             {
                 for(int j = 0; j < N; j++)
                 {
-                    A[i+(N*j)] = abs(i-j);
+                    A[(N*i)+j] = abs(i-j);
                 }
             }
             return 0;
@@ -54,7 +54,13 @@ int Read_by_func(double* A, int N, int K)
             {
                for(int j = 0; j < N; j++)
                 {
-                    A[i+(N*j)] = 1/(i+j-1);
+                    if(((i == 0)&&(j==1)) || ((i == 1)&&(j==0)))
+                    {
+                        A[(N*i)+j] = 1;
+                        cout<<"A["<<i<<", "<<j<<"] = 1, чтобы не делить на 0"<<endl;
+                        continue;
+                    }
+                    A[(N*i)+j] = 1/(i+j-1);
                 }
             }
             return 0;

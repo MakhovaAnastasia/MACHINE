@@ -4,89 +4,80 @@
 int Solve(int n,double* A,double* b,double* x)
 {
     //умножаем слева на Tij
-    for( int i = n-2; i > 1; i--)
+    for( int i = 0; i < n-1; i++)
     {
-        for(int j = n-1; j > i-1; j--)
+        for(int j = i+1; j < n; j++)
         {
-            TA(i,j, A, n); //Tij*A
-            PrintMatrix(A, n, n, n);
-            Tb(i,j,b, n); //Tij*b
-            PrintMatrix(b, 1, n, n);
+            TA(i,j, A,b, n); //Tij*A Tij*b
         }
     }
     // обратный ход метода Гаусса
-    x[n-1] = b[n-1];
-    for( int i = n-2; i > 0; i--)
+    for( int i = n-1; i > 0; i--)
     {
-        x[n-1] = b[n-1];
+        x[i] = b[i];
         for(int j = i+1; j < n; j++)
         {
-            x[n-1] -= A[i*n +j]* x[j];
+            x[i] -= A[i*n +j]* x[j];
         }
+        if(abs(A[i*n + i]) < EPS) //на диагонали  нашли 0
+        {
+            cout<<"нет точного ответа. x["<<i<<"] = 1 "<<endl;
+            x[i] = 1;
+        }
+        else{
+            x[i]/= A[i*n +i];
+        }
+        cout<<x[i];
     }
-    return 1;
+    return 0;
 }
 
-int TA(int i, int j, double* A, int n)
+int TA(int i, int j, double* A, double*b, int n)
 {
-    double x = 0;
+    //определим угол поворота
+    double x = A[i*n + i];
     double y = A[i*n + j];
-    double cos_phi = 0;
-    double sin_phi = 0;
-    for(int k = i; k < j; k++)
+    double cos_phi = x / (sqrt(x*x + y*y));
+    double sin_phi =  -y / (sqrt(x*x +y*y));
+    double xi = 0;
+    double xj = 0;
+    //умножение TA
+    for(int k = i; k < n; k++) //столбцы А
     {
-        x+= (A[i*n+k])* (A[i*n+k]);
-    }
-    x = sqrt(x);
-    cos_phi = x / (sqrt(x*x +y*y));
-    sin_phi = -y / (sqrt(x*x +y*y));
-    //умножение
-    for(int k = 0; k < n; k++) //столбцы А
-    {
-        double xi = A[k*n + i];
-        double xj = A[k*n + j];
-        for(int l = 0; l < n; l++) //строки
+        xi = A[i*n+k];
+        xj = A[j*n + k];
+        for(int l = i; l < n; l++) //строки
         {
             if((k==i)&&(l==j)) //A[j;i] = 0
             {
                 A[l*n + k] = 0;
                 continue;
             }
-            if(l == i)
+            if((k==i)&&(l==i)) //A[i;i] = ||a(i, j)||
+            {
+                A[l*n + k] = sqrt(x*x + y*y);
+                continue;
+            }
+            if(l == i) //A[i,k] = A[i,k]*cos- A[j,k]*sin
             {
                 A[l*n + k] = xi*cos_phi - xj*sin_phi;
                 continue;
             }
-            if(l == j)
+            if(l == j) //A[i,k] = A[i,k]*sin + A[j,k]*cos
             {
                 A[l*n + k] = xi*sin_phi + xj*cos_phi;
                 continue;
             }
+            //иначе: A[l,k] =A[l,k]
         }
     }
-    return 1;
-}
 
-int Tb(int i, int j, double* b, int n)
-{
-    double x = 0;
-    double y = b[i];
-    double cos_phi = 0;
-    double sin_phi = 0;
-    for(int k = i; k < j; k++)
-    {
-        x+= (b[k])* (b[k]);
-    }
-    x = sqrt(x);
-    cos_phi = x / (sqrt(x*x +y*y));
-    sin_phi = -y / (sqrt(x*x +y*y));
-    //умножение
-    double xi = b[i];
-    double xj = b[j];
+    //Tb
+    xi = b[i];
+    xj = b[j];
     b[i] = xi*cos_phi - xj*sin_phi;
     b[j] = xi*sin_phi + xj*cos_phi;
-    //b[i] = sqrt(x*x+b[j]*b[j]); // b[j] еще не изменен тк i>j
-    //b[j] = 0;
-    return 1;
+
+    return 0;
 }
 
