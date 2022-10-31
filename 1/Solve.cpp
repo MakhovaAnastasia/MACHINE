@@ -27,7 +27,6 @@ int Solve(int n,double* A,double* b,double* x)
         else{
             x[i]/= A[i*n +i];
         }
-        cout<<x[i];
     }
     return 0;
 }

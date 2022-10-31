@@ -3,6 +3,7 @@
 #include "Solve.h"
 #include <cmath>
 #include <ctime>
+#include <cstdlib>
 
 double norma_nevyaski(double* A, double*b, double* x, int N);
 double norma_pogreshnosty(double* x,double* x_real, int N);
@@ -42,19 +43,24 @@ int main()
 
     for(int i = 0; i < n; i++)
     {
+        b[i] = 0;
         for( int j = 0; j <= (n+1)/2; j++)
         {
             b[i] += A[(n*i) + (2*k + 1)];
         }
+
         x[i] = 0;
         x_real[i] = (i+1)%2;
     }
+    cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
+    cout<<"b--------"<<endl;
     PrintMatrix(b, 1, n, m);
+    cout<<"x--------"<<endl;
     PrintMatrix(x, 1, n, m);
 
     int start = clock();
-    int res = Solve(n, A, b, x);
+    Solve(n, A, b, x);
     int end = clock(); 
     int time = (end - start)/CLOCKS_PER_SEC;// время работы  в секундах
     cout<<"время работы: "<<time<<endl;
@@ -62,8 +68,11 @@ int main()
     norma_nevyaski(A,b,x,n);
     norma_pogreshnosty(x,x_real, n);
 
+    cout<<"b--------"<<endl;
     PrintMatrix(b, 1, n, m);
+    cout<<"x--------"<<endl;
     PrintMatrix(x, 1, n, m);
+    cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
 
     free(A);
@@ -84,7 +93,7 @@ double norma_nevyaski(double* A, double*b, double* x, int N)
         {
             sum+=A[i*N + j]* x[i];
         }
-        sum - b[i];
+        sum -= b[i];
         if(( abs(b[i]) - b_max) > EPS) // ||b||
         {
             b_max = abs(b[i]);
@@ -96,7 +105,14 @@ double norma_nevyaski(double* A, double*b, double* x, int N)
         }
         sum = 0;
     }
-    max/= b_max; //норма
+    if(abs(b_max) > EPS)
+    {
+        max/= b_max; //норма
+    }
+    else {
+        cout<< "||b|| = 0"<<endl;
+        return -1;
+    }
     cout<< "норма невязки: "<<scientific<<max<< endl; 
     return max;
 }

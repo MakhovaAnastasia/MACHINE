@@ -58,9 +58,10 @@ int Read_by_func(double* A, int N, int K)
                     {
                         A[(N*i)+j] = 1;
                         cout<<"A["<<i<<", "<<j<<"] = 1, чтобы не делить на 0"<<endl;
-                        continue;
                     }
-                    A[(N*i)+j] = 1/(i+j-1);
+                    else{
+                        A[(N*i)+j] = 1/(i+j-1);
+                    }
                 }
             }
             return 0;
@@ -122,7 +123,7 @@ int PrintMatrix(double* M, int l, int n, int m)
     {
         for(int j = 0; j < n; j++)
         {
-            cout<<" "<<M[i*l+j]; 
+            cout<<" "<<scientific<<M[i*l+j];
         }
         cout<<endl;
     } 
