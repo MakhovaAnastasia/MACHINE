@@ -9,7 +9,7 @@ double norma_nevyaski(double* A, double*b, double* x, int N);
 double norma_pogreshnosty(double* x,double* x_real, int N);
 
 
-int main()
+int main(int argc, char* argv[])
 {
     double* A;
     double* b;
@@ -17,13 +17,28 @@ int main()
     double* x_real;
     
     string filename;
+
     int n = -1; //размер матрицы
     int m = -1; //размер вывода
     int k = -1; // формула
-    cin>>n>>m>>k;
+
+    if(!((argc == 4)||(argc == 5))&&
+    (sscanf(argv[1],"%d",&n)==1)&&
+    (sscanf(argv[2],"%d",&m)==1)&&
+    (sscanf(argv[3],"%d",&k)==1))
+    {
+        //ошибка чтения
+        return -1;
+    }
+  !!  if((n<=0)||(m<=0)||(n<m))
+    {
+                cout<<n<<m<<k;
+        cout<<"0<m<=n!!!";
+        return -1;
+    }
     if(k == 0)
     {
-        cin>>filename;
+        filename = argv[4];
     }
 
     A = (double*) malloc(sizeof(double)*n*n);

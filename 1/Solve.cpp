@@ -12,7 +12,7 @@ int Solve(int n,double* A,double* b,double* x)
         }
     }
     // обратный ход метода Гаусса
-    for( int i = n-1; i > 0; i--)
+    for( int i = n-1; i >0; i--)
     {
         x[i] = b[i];
         for(int j = i+1; j < n; j++)
@@ -35,7 +35,7 @@ int TA(int i, int j, double* A, double*b, int n)
 {
     //определим угол поворота
     double x = A[i*n + i];
-    double y = A[i*n + j];
+    double y = A[j*n + i];//[i*n + j];
     double cos_phi = x / (sqrt(x*x + y*y));
     double sin_phi =  -y / (sqrt(x*x +y*y));
     double xi = 0;
@@ -45,6 +45,8 @@ int TA(int i, int j, double* A, double*b, int n)
     {
         xi = A[i*n+k];
         xj = A[j*n + k];
+        //A[i*n + k] = xi*cos_phi - xj*sin_phi;
+        //A[j*n + k] = xi*sin_phi + xj*cos_phi;
         for(int l = i; l < n; l++) //строки
         {
             if((k==i)&&(l==j)) //A[j;i] = 0
@@ -69,6 +71,7 @@ int TA(int i, int j, double* A, double*b, int n)
             }
             //иначе: A[l,k] =A[l,k]
         }
+
     }
 
     //Tb

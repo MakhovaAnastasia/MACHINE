@@ -21,7 +21,7 @@ int Read_by_func(double* A, int N, int K)
             {
                 for(int j = 0; j < N; j++)
                 {
-                    A[(N*i)+j] = N- max(i,j)+1;
+                    A[(N*i)+j] = N- max(i+1,j+1)+1;
                 }
             } 
             return 0;      
@@ -32,7 +32,7 @@ int Read_by_func(double* A, int N, int K)
             {
                 for(int j = 0; j < N; j++)
                 {
-                    A[(N*i)+j] = max(i,j);
+                    A[(N*i)+j] = max(i+1,j+1);
                 }
             } 
             return 0;
@@ -54,14 +54,8 @@ int Read_by_func(double* A, int N, int K)
             {
                for(int j = 0; j < N; j++)
                 {
-                    if(((i == 0)&&(j==1)) || ((i == 1)&&(j==0)))
-                    {
-                        A[(N*i)+j] = 1;
-                        cout<<"A["<<i<<", "<<j<<"] = 1, чтобы не делить на 0"<<endl;
-                    }
-                    else{
-                        A[(N*i)+j] = 1/(i+j-1);
-                    }
+                    A[(N*i)+j] = 1/(double)(i+1+j+1-1);
+
                 }
             }
             return 0;
@@ -77,7 +71,7 @@ int Read_by_func(double* A, int N, int K)
 
 int Read_from_file(double*A, int N, string FileName)
 {
-    double new_number = 0;
+    string new_number{};
     int count_num = 0;
     ifstream in(FileName);
     if(in.is_open())
@@ -85,7 +79,9 @@ int Read_from_file(double*A, int N, string FileName)
         while((!in.eof())&&(count_num <= N*N))
         {
             in>>new_number;
-            A[count_num] = new_number;
+            if(!isValid(new_number))
+            return -13;
+            A[count_num] = stoi(new_number);
             count_num++;
         }
         if (count_num < N*N)
@@ -107,6 +103,29 @@ int Read_from_file(double*A, int N, string FileName)
         return -12; //ошибка при закрытии
     }
     return 0;
+}
+
+bool isValid(string input)
+{
+    int points = 0;
+    for(int i = 0; i < input.length();i++ )
+    {
+        if((input[i]!=0)||(input[i]!=1)||(input[i]!=2)||(input[i]!=3)
+        ||(input[i]!=4)||(input[i]!=5)||(input[i]!=6)||(input[i]!=7)||(input[i]!=8)
+        ||(input[i]!=9))
+        {
+            if(input[i]=='.')
+            {
+                if(points!=0)
+                {
+                    return false;
+                }
+                points++;
+            }
+            return false;
+        }
+    }
+    return true;
 }
 
 int PrintMatrix(double* M, int l, int n, int m)
