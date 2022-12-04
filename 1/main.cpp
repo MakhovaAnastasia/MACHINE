@@ -22,21 +22,21 @@ int main(int argc, char* argv[])
     int m = -1; //размер вывода
     int k = -1; // формула
 
-    if(!((argc == 4)||(argc == 5))&&
+    if(!(((argc == 4)||(argc == 5))&&
     (sscanf(argv[1],"%d",&n)==1)&&
     (sscanf(argv[2],"%d",&m)==1)&&
-    (sscanf(argv[3],"%d",&k)==1))
+    (sscanf(argv[3],"%d",&k)==1)))
     {
         //ошибка чтения
         return -1;
     }
-  !!  if((n<=0)||(m<=0)||(n<m))
+    if((n<=0)||(m<=0)||(n<m))
     {
-                cout<<n<<m<<k;
-        cout<<"0<m<=n!!!";
+        cout<<n<<m<<k<<endl;
+        cout<<"0<m<=n!!!"<<endl;
         return -1;
     }
-    if(k == 0)
+    if((k == 0)&&(argc == 5))
     {
         filename = argv[4];
     }
@@ -49,6 +49,7 @@ int main(int argc, char* argv[])
     
     if(ReadMatrix(A,n,k, filename)!=0)
     {
+        cout<<"ошибка чтения"<<endl;
         free(A);
         free(b);
         free(x);
@@ -78,10 +79,10 @@ int main(int argc, char* argv[])
     Solve(n, A, b, x);
     int end = clock(); 
     int time = (end - start)/CLOCKS_PER_SEC;// время работы  в секундах
-    cout<<"время работы: "<<time<<endl;
+    cout<<"время работы(сек.): "<<time<<endl;
 
-    norma_nevyaski(A,b,x,n);
-    norma_pogreshnosty(x,x_real, n);
+    printf("норма невязки:  %10.3e\n",norma_nevyaski(A,b,x,n));
+    printf("норма погрешности: %10.3e\n",norma_pogreshnosty(x,x_real, n));
 
     cout<<"b--------"<<endl;
     PrintMatrix(b, 1, n, m);
@@ -128,7 +129,7 @@ double norma_nevyaski(double* A, double*b, double* x, int N)
         cout<< "||b|| = 0"<<endl;
         return -1;
     }
-    cout<< "норма невязки: "<<scientific<<max<< endl; 
+    //cout<< "норма невязки: "<<scientific<<max<< endl; 
     return max;
 }
 
@@ -142,6 +143,6 @@ double norma_pogreshnosty(double* x,double* x_real, int N)
             norma = abs(x[i] - x_real[i]);
         }
     }
-    cout<< "норма погрешности: "<<scientific<< norma<< endl; 
+    //cout<< "норма погрешности: "<<scientific<< norma<< endl; 
     return norma;
 }

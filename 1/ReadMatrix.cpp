@@ -80,7 +80,9 @@ int Read_from_file(double*A, int N, string FileName)
         {
             in>>new_number;
             if(!isValid(new_number))
-            return -13;
+            {   
+                return -13;
+            }
             A[count_num] = stoi(new_number);
             count_num++;
         }
@@ -90,7 +92,6 @@ int Read_from_file(double*A, int N, string FileName)
             //меньшее число элементов
             return -11;
         }
-        
     }
     else{
         cout<<"ошибка при открытии файла"<<endl;
@@ -110,9 +111,9 @@ bool isValid(string input)
     int points = 0;
     for(int i = 0; i < input.length();i++ )
     {
-        if((input[i]!=0)||(input[i]!=1)||(input[i]!=2)||(input[i]!=3)
-        ||(input[i]!=4)||(input[i]!=5)||(input[i]!=6)||(input[i]!=7)||(input[i]!=8)
-        ||(input[i]!=9))
+        if((input[i]!='0')&&(input[i]!='1')&&(input[i]!='2')&&(input[i]!='3')
+        &&(input[i]!='4')&&(input[i]!='5')&&(input[i]!='6')&&(input[i]!='7')&&(input[i]!='8')
+        &&(input[i]!='9'))
         {
             if(input[i]=='.')
             {
@@ -122,30 +123,11 @@ bool isValid(string input)
                 }
                 points++;
             }
-            return false;
+            else{
+                return false;
+            }
         }
     }
     return true;
 }
 
-int PrintMatrix(double* M, int l, int n, int m)
-{
-    if(l>m)
-    {
-        l = m;
-    }
-    if(n>m)
-    {
-        n = m;
-    }
-    for(int i = 0; i < l; i++)
-    {
-        for(int j = 0; j < n; j++)
-        {
-            cout<<" "<<scientific<<M[i*l+j];
-        }
-        cout<<endl;
-    } 
-    cout<<endl;
-    return 1;
-}
