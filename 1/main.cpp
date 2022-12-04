@@ -78,8 +78,8 @@ int main(int argc, char* argv[])
     int start = clock();
     Solve(n, A, b, x);
     int end = clock(); 
-    int time = (end - start)/CLOCKS_PER_SEC;// время работы  в секундах
-    cout<<"время работы(сек.): "<<time<<endl;
+    int time = (end - start)/(CLOCKS_PER_SEC/100);// время работы  в секундах
+    cout<<"время работы(сотые доли сек.): "<<time<<endl;
 
     printf("норма невязки:  %10.3e\n",norma_nevyaski(A,b,x,n));
     printf("норма погрешности: %10.3e\n",norma_pogreshnosty(x,x_real, n));
