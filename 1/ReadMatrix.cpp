@@ -109,11 +109,11 @@ int Read_from_file(double*A, int N, string FileName)
 bool isValid(string input)
 {
     int points = 0;
-    for(int i = 0; i < input.length();i++ )
+    for(int i = 0; i < (int)input.length();i++ )
     {
         if((input[i]!='0')&&(input[i]!='1')&&(input[i]!='2')&&(input[i]!='3')
         &&(input[i]!='4')&&(input[i]!='5')&&(input[i]!='6')&&(input[i]!='7')&&(input[i]!='8')
-        &&(input[i]!='9'))
+        &&(input[i]!='9')&&(input[i]!='-'))
         {
             if(input[i]=='.')
             {
