@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
         b[i] = 0;
         for( int j = 0; j <= (n+1)/2; j++)
         {
-            b[i] += A[(n*i) + (2*k + 1)];
+            b[i] += A[(n*i) + (2*j + 1)];
         }
 
         x[i] = 0;
