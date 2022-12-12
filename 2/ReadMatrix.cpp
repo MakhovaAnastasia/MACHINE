@@ -92,44 +92,40 @@ int Read_from_file(double*A, int N, string FileName)
     ifstream in(FileName);
     if(in.is_open())
     {
-        while((!in.eof())&&(count_num <= N*N))
+        while((!in.eof())&&(count_num < N*N))
         {
             in>>new_number;
             if(!isValid(new_number))
             {   
                 return -13;
             }
-            A[count_num] = stoi(new_number);
+            A[count_num] = stod(new_number);
+            cout<<A[count_num]<<" "<<new_number;
             count_num++;
         }
         if (count_num < N*N)
         {
-            cout<<"недостаточно данных"<<endl;
+            //cout<<"недостаточно данных"<<endl;
             //меньшее число элементов
             return -11;
         }
     }
     else{
-        cout<<"ошибка при открытии файла"<<endl;
+        //cout<<"ошибка при открытии файла"<<endl;
         return -10; //ошибка при открытии файла
     }
     in.close();
-    if(in.fail())
-    {
-        cout<<"ошибка при закрытии файла"<<endl;
-        return -12; //ошибка при закрытии
-    }
     return 0;
 }
 
 bool isValid(string input)
 {
     int points = 0;
-    for(int i = 0; i < input.length();i++ )
+    for(int i = 0; i < (int)input.length();i++ )
     {
         if((input[i]!='0')&&(input[i]!='1')&&(input[i]!='2')&&(input[i]!='3')
         &&(input[i]!='4')&&(input[i]!='5')&&(input[i]!='6')&&(input[i]!='7')&&(input[i]!='8')
-        &&(input[i]!='9'))
+        &&(input[i]!='9')&&(input[i]!='-'))
         {
             if(input[i]=='.')
             {

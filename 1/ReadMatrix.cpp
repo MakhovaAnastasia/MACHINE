@@ -6,59 +6,41 @@ int ReadMatrix(double*A, int N, int K, string FileName)
     {
         return Read_from_file(A,N, FileName);
     }
-    else{
-        return Read_by_func(A,N,K);
+    if((K==1)||(K==2)||(K==3)||(K==4))
+    {
+        for(int i = 0; i < N; i++)
+        {
+            for(int j = 0; j < N; j++)
+            {
+                A[(N*i)+j] = f(K,N,i,j);
+            }
+        }
+        return 0;
     }
+
     return -1;
 }
 
-int Read_by_func(double* A, int N, int K)
+
+double f(int K,int N,int i,int j)
 {
+    double r =0;
     switch(K)
     {
         case(1):
-            for(int i = 0; i < N; i++)
-            {
-                for(int j = 0; j < N; j++)
-                {
-                    A[(N*i)+j] = N- max(i+1,j+1)+1;
-                }
-            } 
-            return 0;      
+            r = N- max(i+1,j+1)+1;      
             break;
 
         case(2):
-            for(int i = 0; i < N; i++)
-            {
-                for(int j = 0; j < N; j++)
-                {
-                    A[(N*i)+j] = max(i+1,j+1);
-                }
-            } 
-            return 0;
+            r = max(i+1,j+1);
             break;
 
         case(3):
-            for(int i = 0; i < N; i++)
-            {
-                for(int j = 0; j < N; j++)
-                {
-                    A[(N*i)+j] = abs(i-j);
-                }
-            }
-            return 0;
+            r = abs(i-j);
             break;
 
         case(4):
-            for(int i = 0; i < N; i++)
-            {
-               for(int j = 0; j < N; j++)
-                {
-                    A[(N*i)+j] = 1/(double)(i+1+j+1-1);
-
-                }
-            }
-            return 0;
+            r = 1/(double)(i+1+j+1-1);
             break;
 
         default:    //error
@@ -66,8 +48,9 @@ int Read_by_func(double* A, int N, int K)
             break;
 
     };
-    return -1;
+    return r;
 }
+
 
 int Read_from_file(double*A, int N, string FileName)
 {
@@ -76,7 +59,7 @@ int Read_from_file(double*A, int N, string FileName)
     ifstream in(FileName);
     if(in.is_open())
     {
-        while((!in.eof())&&(count_num <= N*N))
+        while((!in.eof())&&(count_num < N*N))
         {
             in>>new_number;
             if(!isValid(new_number))

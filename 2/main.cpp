@@ -11,7 +11,7 @@ double n_2(double* A, double* x, int N);
 
 int main(int argc, char* argv[])
 {
-    double* A;
+    double* A ;
     double* x;
     
     string filename;
