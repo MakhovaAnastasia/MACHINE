@@ -8,7 +8,11 @@ int Solve(int n,double* A,double* b,double* x)
     {
         for(int j = i+1; j < n; j++)
         {
-            TA(i,j, A,b, n); //Tij*A Tij*b
+            int res  = TA(i,j, A,b, n); //Tij*A Tij*b
+            if(res == -1)
+            {
+                return -1;
+            }
         }
     }
     // обратный ход метода Гаусса
@@ -21,7 +25,7 @@ int Solve(int n,double* A,double* b,double* x)
         }
         if(abs(A[i*n + i]) < EPS) //на диагонали  нашли 0
         {
-            cout<<"нет точного ответа. x["<<i<<"] = 1 "<<endl;
+            //cout<<"нет точного ответа. x["<<i<<"] = 1 "<<endl;
             x[i] = 1;
         }
         else{
@@ -36,8 +40,13 @@ int TA(int i, int j, double* A, double*b, int n)
     //определим угол поворота
     double x = A[i*n + i];
     double y = A[j*n + i];//[i*n + j];
-    double cos_phi = x / (sqrt(x*x + y*y));
-    double sin_phi =  -y / (sqrt(x*x +y*y));
+    double root = sqrt(x*x + y*y);
+    if(abs(root) < EPS)
+    {
+        return -1;
+    }
+    double cos_phi = x / root;
+    double sin_phi =  -y / root;
     double xi = 0;
     double xj = 0;
     //умножение TA

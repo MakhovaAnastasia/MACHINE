@@ -42,6 +42,7 @@ int main(int argc, char* argv[])
     }
 
     A = (double*) malloc(sizeof(double)*n*n);
+    if (A==NULL) exit (1);
     b = (double*) malloc(sizeof(double)*n);
     x = (double*) malloc(sizeof(double)*n);
     x_real = (double*) malloc(sizeof(double)*n);
@@ -60,9 +61,9 @@ int main(int argc, char* argv[])
     for(int i = 0; i < n; i++)
     {
         b[i] = 0;
-        for( int j = 0; j <= (n+1)/2; j++)
+        for( int j = 0; j <= ((n+1)/2)-1; j++)
         {
-            b[i] += A[(n*i) + (2*j + 1)];
+            b[i] += A[(n*i) + (2*j)];
         }
 
         x[i] = 0;
@@ -76,11 +77,16 @@ int main(int argc, char* argv[])
     PrintMatrix(x, 1, n, m);
 
     int start = clock();
-    Solve(n, A, b, x);
+    int res = Solve(n, A, b, x);
+    if(res == -1)
+    {
+        cout<<"делим на ноль. пришлось выйти"<<endl;
+    }
     int end = clock(); 
     int time = (end - start)/(CLOCKS_PER_SEC/100);// время работы  в секундах
     cout<<"время работы(сотые доли сек.): "<<time<<endl;
-
+if(res == 0)
+{
     printf("норма невязки:  %10.3e\n",norma_nevyaski(A,b,x,n));
     printf("норма погрешности: %10.3e\n",norma_pogreshnosty(x,x_real, n));
 
@@ -90,7 +96,7 @@ int main(int argc, char* argv[])
     PrintMatrix(x, 1, n, m);
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
-
+}
     free(A);
     free(b);
     free(x);

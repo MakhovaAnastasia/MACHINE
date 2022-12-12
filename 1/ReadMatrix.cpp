@@ -83,26 +83,22 @@ int Read_from_file(double*A, int N, string FileName)
             {   
                 return -13;
             }
-            A[count_num] = stoi(new_number);
+            A[count_num] = stod(new_number);
+            cout<<A[count_num]<<" "<<new_number;
             count_num++;
         }
         if (count_num < N*N)
         {
-            cout<<"недостаточно данных"<<endl;
+            //cout<<"недостаточно данных"<<endl;
             //меньшее число элементов
             return -11;
         }
     }
     else{
-        cout<<"ошибка при открытии файла"<<endl;
+        //cout<<"ошибка при открытии файла"<<endl;
         return -10; //ошибка при открытии файла
     }
     in.close();
-    if(in.fail())
-    {
-        cout<<"ошибка при закрытии файла"<<endl;
-        return -12; //ошибка при закрытии
-    }
     return 0;
 }
 
