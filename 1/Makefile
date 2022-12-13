@@ -6,7 +6,7 @@
 #	g++ Solve.cpp ReadMatrix.cpp PrintMatrix.cpp main.cpp -g -o Proga.out
 
 CC=g++
-CFLAGS=-c -g -Wall
+CFLAGS=-c -g -O3 -Wall
 LDFLAGS=
 SOURCES=Solve.cpp ReadMatrix.cpp PrintMatrix.cpp main.cpp
 OBJECTS=$(SOURCES:.cpp=.o)

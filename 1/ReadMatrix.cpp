@@ -67,7 +67,7 @@ int Read_from_file(double*A, int N, string FileName)
                 return -13;
             }
             A[count_num] = stod(new_number);
-            cout<<A[count_num]<<" "<<new_number;
+            //cout<<A[count_num]<<" "<<new_number;
             count_num++;
         }
         if (count_num < N*N)

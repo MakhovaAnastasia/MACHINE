@@ -113,7 +113,7 @@ double norma_nevyaski(double* A, double*b, double* x, int N)
     {
         for(int j =  0; j< N; j++)
         {
-            sum+=A[i*N + j]* x[i];
+            sum+=A[i*N + j]* x[j];
         }
         sum -= b[i];
         if(( abs(b[i]) - b_max) > EPS) // ||b||
@@ -121,6 +121,7 @@ double norma_nevyaski(double* A, double*b, double* x, int N)
             b_max = abs(b[i]);
         }
         sum = abs(sum);
+
         if( (sum - max) > EPS)
         {
             max = sum;

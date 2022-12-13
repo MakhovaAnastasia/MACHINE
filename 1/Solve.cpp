@@ -16,7 +16,7 @@ int Solve(int n,double* A,double* b,double* x)
         }
     }
     // обратный ход метода Гаусса
-    for( int i = n-1; i >0; i--)
+    for( int i = n-1; i >= 0; i--)
     {
         x[i] = b[i];
         for(int j = i+1; j < n; j++)
