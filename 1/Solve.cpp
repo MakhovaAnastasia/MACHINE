@@ -50,12 +50,24 @@ int TA(int i, int j, double* A, double*b, int n)
     double xi = 0;
     double xj = 0;
     //умножение TA
+
     for(int k = i; k < n; k++) //столбцы А
     {
         xi = A[i*n+k];
         xj = A[j*n + k];
+        if(k==i)
+        {
+            A[i*n + i] = sqrt(x*x + y*y);
+            A[j*n + i] = 0;
+        }
+        else
+        {
+            A[i*n + k] = xi*cos_phi - xj*sin_phi;
+            A[j*n + k] = xi*sin_phi + xj*cos_phi;
+         }
         //A[i*n + k] = xi*cos_phi - xj*sin_phi;
         //A[j*n + k] = xi*sin_phi + xj*cos_phi;
+        /*
         for(int l = i; l < n; l++) //строки
         {
             if((k==i)&&(l==j)) //A[j;i] = 0
@@ -80,6 +92,8 @@ int TA(int i, int j, double* A, double*b, int n)
             }
             //иначе: A[l,k] =A[l,k]
         }
+        */
+
 
     }
 
