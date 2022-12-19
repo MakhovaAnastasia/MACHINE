@@ -4,6 +4,7 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+//eps найти по формуле
 
 double norma_nevyaski(double* A, double*b, double* x, int N);
 double norma_pogreshnosty(double* x,double* x_real, int N);
@@ -136,6 +137,10 @@ double norma_nevyaski(double* A, double*b, double* x, int N)
         cout<< "||b|| = 0"<<endl;
         return -1;
     }
+    if(abs(max) <EPS)
+    {
+        max = 0;
+    }
     //cout<< "норма невязки: "<<scientific<<max<< endl; 
     return max;
 }
@@ -149,6 +154,10 @@ double norma_pogreshnosty(double* x,double* x_real, int N)
         {
             norma = abs(x[i] - x_real[i]);
         }
+    }
+    if(abs(norma) <EPS)
+    {
+        norma = 0;
     }
     //cout<< "норма погрешности: "<<scientific<< norma<< endl; 
     return norma;
