@@ -1,8 +1,13 @@
 #include "Solve.h"
 #include "ReadMatrix.h"
+//problem- 2
 
 int Solve(int n,double* A,double* b,double* x)
 {
+    for(int j = k+2-1; j<n;j++)
+    {
+        sum+=A[jn+k]
+    }
     //умножаем слева на Tij
     for( int i = 0; i < n-1; i++)
     {
