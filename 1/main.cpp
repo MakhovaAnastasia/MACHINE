@@ -6,8 +6,8 @@
 #include <cstdlib>
 //eps найти по формуле
 
-double norma_nevyaski(double* A, double*b, double* x, int N);
-double norma_pogreshnosty(double* x,double* x_real, int N);
+double norma_nevyaski(double* A, double*b, double* x, int N,double EPS);
+double norma_pogreshnosty(double* x,double* x_real, int N,double EPS);
 
 
 int main(int argc, char* argv[])
@@ -16,6 +16,7 @@ int main(int argc, char* argv[])
     double* b;
     double* x;
     double* x_real;
+    double EPS = 1.e-14;
     
     string filename;
 
@@ -58,18 +59,32 @@ int main(int argc, char* argv[])
         free(x_real);
         return 0;
     }
-
+    double nA = 0;
     for(int i = 0; i < n; i++)
     {
+        int sum = 0;
         b[i] = 0;
         for( int j = 0; j <= ((n+1)/2)-1; j++)
         {
             b[i] += A[(n*i) + (2*j)];
         }
+        for( int j = 0; j <n; j++)
+        {
+            sum += abs(A[n*i +j]);
+        }
+        if((i == 0)||(nA< sum))
+        {
+            nA = sum;
+        }
 
         x[i] = 0;
         x_real[i] = (i+1)%2;
     }
+        cout<<nA;
+        if(nA< EPS)
+        {
+            EPS = 1e-24;
+        }
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
     cout<<"b--------"<<endl;
@@ -78,7 +93,7 @@ int main(int argc, char* argv[])
     PrintMatrix(x, 1, n, m);
 
     int start = clock();
-    int res = Solve(n, A, b, x);
+    int res = Solve(n, A, b, x,EPS);
     if(res == -1)
     {
         cout<<"делим на ноль. пришлось выйти"<<endl;
@@ -88,8 +103,8 @@ int main(int argc, char* argv[])
     cout<<"время работы(сотые доли сек.): "<<time<<endl;
 if(res == 0)
 {
-    printf("норма невязки:  %10.3e\n",norma_nevyaski(A,b,x,n));
-    printf("норма погрешности: %10.3e\n",norma_pogreshnosty(x,x_real, n));
+    printf("норма невязки:  %10.3e\n",norma_nevyaski(A,b,x,n,EPS));
+    printf("норма погрешности: %10.3e\n",norma_pogreshnosty(x,x_real, n,EPS));
 
     cout<<"b--------"<<endl;
     PrintMatrix(b, 1, n, m);
@@ -105,7 +120,7 @@ if(res == 0)
     return 0;
 }
 
-double norma_nevyaski(double* A, double*b, double* x, int N)
+double norma_nevyaski(double* A, double*b, double* x, int N,double EPS)
 {   //  ||Ax-b|| / ||b||
     double sum = 0; //ищем максимум по суммам модулей коэф. строк.
     double b_max = 0;
@@ -145,7 +160,7 @@ double norma_nevyaski(double* A, double*b, double* x, int N)
     return max;
 }
 
-double norma_pogreshnosty(double* x,double* x_real, int N)
+double norma_pogreshnosty(double* x,double* x_real, int N,double EPS)
 {
     double norma  = 0;
     for( int i = 0; i < N; i++) // ||x - x_real||

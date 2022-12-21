@@ -1,14 +1,14 @@
 #include "Solve.h"
 #include "ReadMatrix.h"
 
-int Solve(int n,double* A,double* b,double* x)
+int Solve(int n,double* A,double* b,double* x,double EPS)
 {
     //умножаем слева на Tij
     for( int i = 0; i < n-1; i++)
     {
         for(int j = i+1; j < n; j++)
         {
-            int res  = TA(i,j, A,b, n); //Tij*A Tij*b
+            int res  = TA(i,j, A,b, n,EPS); //Tij*A Tij*b
             if(res == -1)
             {
                 return -1;
@@ -39,7 +39,7 @@ int Solve(int n,double* A,double* b,double* x)
     return 0;
 }
 
-int TA(int i, int j, double* A, double*b, int n)
+int TA(int i, int j, double* A, double*b, int n,double EPS)
 {
     //определим угол поворота
     double x = A[i*n + i];
