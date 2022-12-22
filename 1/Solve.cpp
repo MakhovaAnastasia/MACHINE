@@ -23,10 +23,10 @@ int Solve(int n,double* A,double* b,double* x,double EPS)
         {
             x[i] -= A[i*n +j]* x[j];
         }
-        if(abs(A[i*n + i]) < EPS) //на диагонали  нашли 0
+        if(abs(A[i*n + i]) < EPS) //на диагонали  нашли 0. матрица вырождена
         {
             //cout<<"нет точного ответа. x["<<i<<"] = 1 "<<endl;
-            x[i] = 0;
+            return -1;
         }
         else{
             x[i]/= A[i*n +i];

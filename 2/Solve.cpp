@@ -2,37 +2,30 @@
 #include "ReadMatrix.h"
 //problem- 2
 
-int Solve(int n,double* A,double* b,double* x)
+int Solve(int n,double* A,double* x, double EPS)
 {
-    for(int j = k+2-1; j<n;j++)
+    for(int i = 0;i<n; i++)
     {
-        sum+=A[jn+k]
-    }
-    //умножаем слева на Tij
-    for( int i = 0; i < n-1; i++)
-    {
-        for(int j = i+1; j < n; j++)
+        //s[k]
+        for(int j = k+2; j<n;j++)
         {
-            TA(i,j, A,b, n); //Tij*A Tij*b
+            s+=(abs(A[j*n+k]))*(abs(A[j*n+k]));
         }
-    }
-    // обратный ход метода Гаусса
-    for( int i = n-1; i >0; i--)
-    {
-        x[i] = b[i];
-        for(int j = i+1; j < n; j++)
+        s = sqrt(s);
+        for(int j = k; j<n;j++)
         {
-            x[i] -= A[i*n +j]* x[j];
-        }
-        if(abs(A[i*n + i]) < EPS) //на диагонали  нашли 0
-        {
-            cout<<"нет точного ответа. x["<<i<<"] = 1 "<<endl;
-            x[i] = 1;
-        }
-        else{
-            x[i]/= A[i*n +i];
+            x[j] = A[(n*j) +k];
+            if(j==k)
+            {
+                x[j]-=sqrt(s+abs(A[A[(k+1)*n+k]]))
+            }
         }
     }
+
+    //
+
+    NearlyTriangle(n, A, EPS);
+    QRRotate(n,A,x,EPS);
     return 0;
 }
 

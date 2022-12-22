@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
     double nA = 0;
     for(int i = 0; i < n; i++)
     {
-        int sum = 0;
+        double sum = 0;
         b[i] = 0;
         for( int j = 0; j <= ((n+1)/2)-1; j++)
         {
@@ -80,10 +80,19 @@ int main(int argc, char* argv[])
         x[i] = 0;
         x_real[i] = (i+1)%2;
     }
-        cout<<nA;
-        if(nA< EPS)
+
+        if(nA< 1)
         {
-            EPS = 1e-24;
+            cout<<"A--------"<<endl;
+            PrintMatrix(A, n, n, m);
+           for(int i = 0; i< n; i++)
+           {
+               for(int j = 0 ;j <n; j++)
+               {
+                   A[n*i+j]/=nA;
+               }
+               b[i]/=nA;
+           }
         }
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
