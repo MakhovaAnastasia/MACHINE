@@ -8,7 +8,7 @@ all:
 #	./Proga.out 
 #endif
 CC=g++
-CFLAGS=-c -g -Wall
+CFLAGS=-c -g -O3 -Wall
 LDFLAGS=
 SOURCES=Solve.cpp ReadMatrix.cpp PrintMatrix.cpp main.cpp
 OBJECTS=$(SOURCES:.cpp=.o)

@@ -4,32 +4,77 @@
 
 int Solve(int n,double* A,double* x, double EPS)
 {
-    for(int i = 0;i<n; i++)
+    for(int k = 0;k < n-1; k++) //n-2 steps
     {
-        //s[k]
-        for(int j = k+2; j<n;j++)
+        double s= 0.;
+        double norm_x = 0;
+        double b_x = 0;
+        double norm_a = 0;
+        for(int j = k+2; j < n; j++)
         {
             s+=(abs(A[j*n+k]))*(abs(A[j*n+k]));
         }
         s = sqrt(s);
-        for(int j = k; j<n;j++)
+        //x
+        for(int j = k+1; j < n; j++)
         {
-            x[j] = A[(n*j) +k];
-            if(j==k)
+            x[j] = A[(n*j) + k];
+            if(j==k+1)
             {
-                x[j]-=sqrt(s+abs(A[A[(k+1)*n+k]]))
+                norm_a = sqrt(s + abs(A[(k+1)*n+k])*abs(A[(k+1)*n+k]));
+                x[j]-=norm_a;
+                norm_x = sqrt((x[j]*x[j])+s);
+                if(norm_x < EPS)    return -1;
+            }
+            x[j]/= norm_x;
+        }
+        //U(x)AU(x)
+        for(int j = k; j<n; j++)
+        {
+            double scalar = 0;
+            //(||a||,0 0 0 ... 0 )
+            for(int i = k+1; i < n; i++)
+            {
+                if((i==k+1) && (j == k))
+                {
+                    A[i*n+j] = norm_a;
+                    continue;
+                }  
+                if(j == k)
+                {
+                    A[i*n+j] = 0;
+                    continue;
+                }  
+                scalar+=A[i*n+j]*x[i];
+            }
+            //U(x)A по столбцам
+            for(int i = k+1; i < n; i++)
+            {   
+                if(j != k)
+                {
+                    A[i*n+j] = A[i*n+j]-2*scalar*x[i];
+                }
+            }
+        }
+        //AU(x)~~ по лемме 11 по строкам
+        for(int i = 0; i < n; i++)
+        {   
+            double scalar = 0;
+            for(int j = k+1; j<n; j++)
+            {
+                scalar+=A[i*n+j]*x[j];
+            }
+            for(int j = k+1; j<n; j++)
+            {
+                A[i*n+j] = A[i*n+j]-2*scalar*x[j];
             }
         }
     }
-
-    //
-
-    NearlyTriangle(n, A, EPS);
     QRRotate(n,A,x,EPS);
     return 0;
 }
 
-int TA(int i, int j, double* A, double*b, int n)
+int TA(int i, int j, double* A, double*b, int n,double EPS)
 {
     //определим угол поворота
     double x = A[i*n + i];

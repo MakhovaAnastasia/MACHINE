@@ -53,6 +53,14 @@ int TA(int i, int j, double* A, double*b, int n,double EPS)
     double sin_phi =  -y / root;
     double xi = 0;
     double xj = 0;
+        //Tb
+    xi = b[i];
+    xj = b[j];
+
+    b[i] = xi*cos_phi - xj*sin_phi;
+    b[j] = xi*sin_phi + xj*cos_phi;
+    if(abs(b[i])< EPS)   b[i] = 0.0;
+    if(abs(b[j])< EPS)   b[j] = 0.0;
     //умножение TA
 
     for(int k = i; k < n; k++) //столбцы А
@@ -114,11 +122,7 @@ int TA(int i, int j, double* A, double*b, int n,double EPS)
 
     }
 
-    //Tb
-    xi = b[i];
-    xj = b[j];
-    b[i] = xi*cos_phi - xj*sin_phi;
-    b[j] = xi*sin_phi + xj*cos_phi;
+
 
     return 0;
 }

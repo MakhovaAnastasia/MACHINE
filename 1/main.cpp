@@ -4,7 +4,6 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
-//eps найти по формуле
 
 double norma_nevyaski(double* A, double*b, double* x, int N,double EPS);
 double norma_pogreshnosty(double* x,double* x_real, int N,double EPS);
@@ -72,7 +71,7 @@ int main(int argc, char* argv[])
         {
             sum += abs(A[n*i +j]);
         }
-        if((i == 0)||(nA< sum))
+        if((i == 0)||(nA < sum))
         {
             nA = sum;
         }
@@ -81,10 +80,13 @@ int main(int argc, char* argv[])
         x_real[i] = (i+1)%2;
     }
 
-        if(nA< 1)
+    cout<<nA<<endl;
+        if(abs(nA -1.0) > EPS)
         {
             cout<<"A--------"<<endl;
             PrintMatrix(A, n, n, m);
+            cout<<"b--------"<<endl;
+            PrintMatrix(b, 1, n, m);
            for(int i = 0; i< n; i++)
            {
                for(int j = 0 ;j <n; j++)
@@ -94,6 +96,8 @@ int main(int argc, char* argv[])
                b[i]/=nA;
            }
         }
+        cout<<nA/nA<<endl;
+        cout<<EPS<<endl;
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
     cout<<"b--------"<<endl;

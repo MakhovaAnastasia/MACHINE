@@ -95,10 +95,10 @@ int Read_from_file(double*A, int N, string FileName)
         while((!in.eof())&&(count_num < N*N))
         {
             in>>new_number;
-            if(!isValid(new_number))
-            {   
-                return -13;
-            }
+            //if(!isValid(new_number))
+            //{   
+            //    return -13;
+            //}
             A[count_num] = stod(new_number);
             cout<<A[count_num]<<" "<<new_number;
             count_num++;
