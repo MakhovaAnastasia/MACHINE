@@ -18,13 +18,13 @@ int main(int argc, char* argv[])
 
     int n = -1; //размер матрицы
     int m = -1; //размер вывода
-    double e = 0.0; //точность нахождения с.з.
+    double EPS = 0.0; //точность нахождения с.з.
     int k = -1; // формула
 
     if(!(((argc == 5)||(argc == 6))&&
     (sscanf(argv[1],"%d",&n)==1)&&
     (sscanf(argv[2],"%d",&m)==1)&&
-    (sscanf(argv[3],"%lf",&e)==1)&&
+    (sscanf(argv[3],"%le",&EPS)==1)&&
     (sscanf(argv[4],"%d",&k)==1)))
     {
         //ошибка чтения
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
     PrintMatrix(A, n, n, m);
 
     int start = clock();
-    Solve(n, A, x, e);
+    Solve(n, A, x, EPS);
     int end = clock(); 
     int time = (end - start)/(CLOCKS_PER_SEC/100);// время работы  в секундах
     cout<<"время работы(сотые доли сек.): "<<time<<endl;

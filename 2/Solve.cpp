@@ -4,11 +4,11 @@
 
 int Solve(int n,double* A,double* x, double EPS)
 {
+    //почти треугольный вид
     for(int k = 0;k < n-1; k++) //n-2 steps
     {
         double s= 0.;
         double norm_x = 0;
-        double b_x = 0;
         double norm_a = 0;
         for(int j = k+2; j < n; j++)
         {
@@ -70,7 +70,14 @@ int Solve(int n,double* A,double* x, double EPS)
             }
         }
     }
-    QRRotate(n,A,x,EPS);
+    k = n-1
+    do{
+        
+
+    }while(k>1)
+
+
+    //QRRotate(n,A,x,EPS);
     return 0;
 }
 
@@ -125,4 +132,6 @@ int TA(int i, int j, double* A, double*b, int n,double EPS)
 
     return 0;
 }
+
+
 
