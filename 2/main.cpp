@@ -13,6 +13,8 @@ int main(int argc, char* argv[])
 {
     double* A ;
     double* x;
+    double* Q_cos;
+    double* Q_sin;
     
     string filename;
 
@@ -42,26 +44,44 @@ int main(int argc, char* argv[])
 
     A = (double*) malloc(sizeof(double)*n*n);
     x = (double*) malloc(sizeof(double)*n);
+    Q_cos = (double*) malloc(sizeof(double)*(n-1));
+    Q_sin = (double*) malloc(sizeof(double)*(n-1));
     
     if(ReadMatrix(A,n,k, filename)!=0)
     {
         cout<<"ошибка чтения"<<endl;
         free(A);
         free(x);
+        free(Q_cos);
+        free(Q_sin);
         return 0;
+    }
+    for(int i = 0; i<n ; i++)
+    {
+        x[i] = 0;
+        if(i != n-1)
+        {
+            Q_cos[i] = 0;
+            Q_sin[i] = 0;
+        }
+
     }
 
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
 
     int start = clock();
-    Solve(n, A, x, EPS);
+    int res = Solve(n, A, x, EPS, Q_cos, Q_sin);
+    if(res == -1)
+    {
+        cout<<"делим на ноль. пришлось выйти"<<endl;
+    }
     int end = clock(); 
     int time = (end - start)/(CLOCKS_PER_SEC/100);// время работы  в секундах
     cout<<"время работы(сотые доли сек.): "<<time<<endl;
 
-    printf("невязка в первом инварианте:  %10.3e\n",n_1(A,x,n));
-    printf("невязка во втором инварианте: %10.3e\n",n_2(A,x,n));
+    //printf("невязка в первом инварианте:  %10.3e\n",n_1(A,x,n));
+    //printf("невязка во втором инварианте: %10.3e\n",n_2(A,x,n));
 
 
     cout<<"x(собственные значения)--------"<<endl;
@@ -71,6 +91,8 @@ int main(int argc, char* argv[])
 
     free(A);
     free(x);
+    free(Q_cos);
+    free(Q_sin);
 
     return 0;
 }

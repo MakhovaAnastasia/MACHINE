@@ -45,7 +45,7 @@ int TA(int i, int j, double* A, double*b, int n,double EPS)
     double x = A[i*n + i];
     double y = A[j*n + i];//[i*n + j];
     double root = sqrt(x*x + y*y);
-    if(root < EPS)
+    if(abs(root) < EPS)
     {
         return -1;
     }
