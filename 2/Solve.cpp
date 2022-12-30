@@ -26,8 +26,11 @@ int Solve(int n,double* A,double* x, double EPS, double* Q_cos, double* Q_sin)
                 norm_x = sqrt((abs(x[j])*abs(x[j]))+s);
                 if(norm_x < EPS)
                 {
-                     //cout<<"norm"<<norm_x<<" "<<A[(n*j) + k]<<" "<<j<<" "<<k;
-                    return -1;
+                     for(int i = k+1; i < n; i++)
+                     {
+                         x[i] = 0;
+                     }
+                     break;
                 }
             }
             x[j]/= norm_x;
@@ -116,7 +119,7 @@ int Solve(int n,double* A,double* x, double EPS, double* Q_cos, double* Q_sin)
         //for(int i = k-1; i>=0; i--)
         for(int i = 0; i< k; i++)
         {
-            int res=T2(i, i+1, A,n,k+1,EPS, Q_cos, Q_sin);
+            int res=T2(i, i+1, A,n,EPS, Q_cos, Q_sin);
             if(res == -1)
             {
                  // cout<<"do2";
@@ -235,7 +238,7 @@ int TA(int i, int j, double* A,int n,int m, double EPS,double* Q_cos, double* Q_
     return 0;
 }
 
-int T2(int i, int j, double* A,int n,int m, double EPS,double* Q_cos, double* Q_sin)
+int T2(int i, int j, double* A,int n, double EPS,double* Q_cos, double* Q_sin)
 {
     double cos_phi = Q_cos[i];
     double sin_phi =  Q_sin[i];
