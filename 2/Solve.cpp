@@ -97,7 +97,7 @@ int Solve(int n,double* A,double* x, double EPS, double* Q_cos, double* Q_sin)
         double nA  = 0;
         //QR со сдвигом: A -sI = QR
         //R = ПT(i,i+1)(A-sI)
-        //cout<<x[k]<<" "<< s<<" "<<nA<<" "<<k<<endl;
+        cout<<x[k]<<" "<< s<<" "<<nA<<" "<<k<<endl;
         //сдвиг
         for(int j = 0; j<= k; j++)
         {
