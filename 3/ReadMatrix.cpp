@@ -6,7 +6,6 @@ int ReadMatrix(double*A, int N, int K, string FileName)
     {
         return Read_from_file(A,N, FileName);
     }
-
     if((K==1)||(K==2)||(K==3)||(K==4))
     {
         for(int i = 0; i < N; i++)
@@ -33,44 +32,11 @@ double f(int K,int N,int i,int j)
             break;
 
         case(2):
-            if(i==j)
-            {
-                r = 2.;
-            }
-            else{
-                if(abs(i-j)==1)
-                {
-                    r = -1;
-                }
-                else
-                {
-                    r = 0.;
-                }
-            }
+            r = max(i+1,j+1);
             break;
 
         case(3):
-            if((j==i)&&(j < N-1))
-            {
-                r = 1.;
-            }
-            else{
-                if(j==(N-1))
-                {
-                    r = i;
-                }
-                else
-                {
-                    if(i==(N-1))
-                    {
-                        r = j;
-                    }
-                    else
-                    {
-                        r = 0.;
-                    }
-                }
-            }
+            r = abs(i-j);
             break;
 
         case(4):
@@ -85,6 +51,7 @@ double f(int K,int N,int i,int j)
     return r;
 }
 
+
 int Read_from_file(double*A, int N, string FileName)
 {
     string new_number{};
@@ -96,7 +63,7 @@ int Read_from_file(double*A, int N, string FileName)
         {
             in>>new_number;
             //if(!isValid(new_number))
-            //{   
+            //{
             //    return -13;
             //}
             A[count_num] = stod(new_number);

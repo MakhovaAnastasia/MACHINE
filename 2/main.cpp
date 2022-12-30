@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
         free(Q_sin);
         return 0;
     }
+
     for(int i = 0; i<n ; i++)
     {
         x[i] = 0;
@@ -80,14 +81,27 @@ int main(int argc, char* argv[])
     int time = (end - start)/(CLOCKS_PER_SEC/100);// время работы  в секундах
     cout<<"время работы(сотые доли сек.): "<<time<<endl;
 
-    //printf("невязка в первом инварианте:  %10.3e\n",n_1(A,x,n));
-    //printf("невязка во втором инварианте: %10.3e\n",n_2(A,x,n));
-
+if(res == 0)
+{
+    printf("невязка в первом инварианте:  %10.3e\n",n_1(A,x,n));
+    printf("невязка во втором инварианте: %10.3e\n",n_2(A,x,n));
 
     cout<<"x(собственные значения)--------"<<endl;
     PrintMatrix(x, 1, n, m);
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
+}
+if(res>0)
+{
+    //printf("невязка в первом инварианте:  %10.3e\n",n_1(A,x,n));
+    //printf("невязка во втором инварианте: %10.3e\n",n_2(A,x,n));
+
+    cout<<"x(собственные значения)"<<res<<" шт.--------"<<endl;
+    PrintMatrix(x, 1, res, m);
+    PrintMatrix(x, 1, n, m);
+    cout<<"A--------"<<endl;
+    PrintMatrix(A, n, n, m);
+}
 
     free(A);
     free(x);
