@@ -2,7 +2,7 @@
 #include "ReadMatrix.h"
 //problem- 2
 
-int Solve(int n,double* A,double* x, double EPS, double* Q_cos, double* Q_sin)
+int Solve(const int n,double* A,double* x, double EPS, double* Q_cos, double* Q_sin)
 {
     //почти треугольный вид
     for(int k = 0;k < n-2; k++) //n-2 steps
@@ -88,38 +88,44 @@ int Solve(int n,double* A,double* x, double EPS, double* Q_cos, double* Q_sin)
                     }
                 }
             }
-            //PrintMatrix(A, n, n, n);
-        
+            PrintMatrix(A, n, n, n);
     }
+
+//QR-rotate
     int k = n-1;
+    int steps = 0;
+    if(n> 2){
     do{
         double s = A[k*n +k];
         double nA  = 0;
         //QR со сдвигом: A -sI = QR
         //R = ПT(i,i+1)(A-sI)
-        cout<<x[k]<<" "<< s<<" "<<nA<<" "<<k<<endl;
+        cout<<" s ="<< s<<" k = "<<k<<endl;
         //сдвиг
         for(int j = 0; j<= k; j++)
         {
             A[j*n+j] -=s;
         }
-                   //PrintMatrix(A, n, n, n);
+        //PrintMatrix(A, n, n, n);
 
         for(int i = 0; i< k; i++)
         {
             int res=TA(i, i+1, A,n,k+1,EPS, Q_cos, Q_sin);
+                cout<<"!!"<<endl;
+        PrintMatrix(A, n, n, n);
             if(res == -1)
             {
                 //cout<<"do";
                 return -1;
             }
-            //cout<<Q_cos[i]<<" "<<Q_sin[i]<<" "<<k<<endl;
         }
         //A = RQ +sI = RПT(i,i+1) +sI
         //for(int i = k-1; i>=0; i--)
         for(int i = 0; i< k; i++)
         {
             int res=T2(i, i+1, A,n,EPS, Q_cos, Q_sin);
+            cout<<"??"<<Q_cos[i]<<" "<<Q_sin[i]<<endl;
+        PrintMatrix(A, n, n, n);
             if(res == -1)
             {
                  // cout<<"do2";
@@ -138,31 +144,37 @@ int Solve(int n,double* A,double* x, double EPS, double* Q_cos, double* Q_sin)
             double sum = 0;
             for( int j = 0; j <=k; j++)
             {
-                sum += abs(A[n*j +i]);
+                sum += abs(A[i*n +j]);
             }
             if((i == 0)||(nA < sum))
             {
                 nA = sum;
             }
         }
+
+            //cout<<abs(A[k*n +(k-1)]) <<" "<<EPS*nA<<endl;
+            PrintMatrix(A, n, n, n);
+            cout<<"x["<<k<<"]="<<A[k*n+k]<<endl;
+            cout<<"nA = "<<nA<<" A="<<A[k*n +(k-1)]<<endl;
         if(abs(A[k*n +(k-1)])< EPS*nA)
         {
            
-                   x[k] = s;//новое собственное значение
+                   x[k] = A[k*n+k];//s;//новое собственное значение
                    //PrintMatrix(A, n, n, n);
-                   //cout<<x[k]<<" !!!!"<< s<<" "<<nA<<" "<<k<<endl;
+                   cout<<x[k]<<" !!!!"<< s<<" "<<nA<<" "<<k<<endl;
             k--;
-            continue;
         }
-    }while(k > 1);
-
+        steps++;
+    }while((k > 1)&&(steps < 10));
+    }
     if(n>1)
     {
         //у матрицы 2х2 легко найти собственные значения:
-        double D = (A[0*n +0] +A[1*n +1])*(A[0*n +0] +A[1*n +1]) - 4*((A[0*n +0]*A[1*n +1]) - (A[0*n +1] *A[1*n +0]));
+        double D = ((A[0*n +0] -A[1*n +1])*(A[0*n +0] -A[1*n +1])) + (4*A[0*n +1] *A[1*n +0]);
+        cout<<"D = "<<D<<endl;
         if(D < -EPS)//нет решения
         {
-            //cout<<n<<endl;
+            //cout<<"D<0"<<endl;
             return n-2;
         }
         if(abs(D) < EPS)//D = 0
@@ -193,16 +205,24 @@ int TA(int i, int j, double* A,int n,int m, double EPS,double* Q_cos, double* Q_
     if(abs(root) < EPS)
     {
         root = 0;
-        cos_phi = (x > EPS ? 1. : -1.);
+        cos_phi = (x > 0 ? 1. : -1.);
     }
     else{
         cos_phi = x / root;
         sin_phi =  -y / root;
     }
-
+    if(abs(cos_phi)<EPS)
+    {
+        cos_phi = 0;
+    }
+        if(abs(sin_phi)<EPS)
+    {
+        sin_phi = 0;
+    }
 
     Q_cos[i] = cos_phi;
     Q_sin[i] = sin_phi;
+    cout<<i<<" x ="<<x<<" "<<j<<"y = "<<y<<" sin = "<<sin_phi<<" cos = "<<cos_phi<<" r =  "<<root<<endl;
     double xi = 0;
     double xj = 0;
     //умножение TA
@@ -214,10 +234,6 @@ int TA(int i, int j, double* A,int n,int m, double EPS,double* Q_cos, double* Q_
         if(k==i)
         {
             A[i*n + i] = root;
-            if(abs(A[i*n + i]) < EPS)
-            {
-                A[i*n + i] = 0;
-            }
             A[j*n + i] = 0;
         }
         else
@@ -250,6 +266,7 @@ int T2(int i, int j, double* A,int n, double EPS,double* Q_cos, double* Q_sin)
     {
         xi = A[k*n+i];
         xj = A[k*n + j];
+        cout<<xj<<endl;
 
             A[k*n + i] = xi*cos_phi - xj*sin_phi;
             if(abs(A[k*n + i]) < EPS)
