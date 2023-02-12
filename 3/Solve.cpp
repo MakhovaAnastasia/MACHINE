@@ -53,7 +53,9 @@ int TA(int i, int j, double* A, double*b, int n,double EPS)
     double sin_phi =  -y / root;
     double xi = 0;
     double xj = 0;
-        //Tb
+
+    
+    //Tb
     xi = b[i];
     xj = b[j];
 
@@ -90,40 +92,7 @@ int TA(int i, int j, double* A, double*b, int n,double EPS)
                 A[j*n + k] = 0;
             }
         }
-        //A[i*n + k] = xi*cos_phi - xj*sin_phi;
-        //A[j*n + k] = xi*sin_phi + xj*cos_phi;
-        /*
-        for(int l = i; l < n; l++) //строки
-        {
-            if((k==i)&&(l==j)) //A[j;i] = 0
-            {
-                A[l*n + k] = 0;
-                continue;
-            }
-            if((k==i)&&(l==i)) //A[i;i] = ||a(i, j)||
-            {
-                A[l*n + k] = sqrt(x*x + y*y);
-                continue;
-            }
-            if(l == i) //A[i,k] = A[i,k]*cos- A[j,k]*sin
-            {
-                A[l*n + k] = xi*cos_phi - xj*sin_phi;
-                continue;
-            }
-            if(l == j) //A[i,k] = A[i,k]*sin + A[j,k]*cos
-            {
-                A[l*n + k] = xi*sin_phi + xj*cos_phi;
-                continue;
-            }
-            //иначе: A[l,k] =A[l,k]
-        }
-        */
-
-
     }
-
-
 
     return 0;
 }
-

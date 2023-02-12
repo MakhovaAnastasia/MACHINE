@@ -1,16 +1,57 @@
 
 #include "ReadMatrix.h"
 #include "Solve.h"
+#include "get_time.h"
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <pthread.h>
 
 double norma_nevyaski(double* A, double*b, double* x, int N,double EPS);
 double norma_pogreshnosty(double* x,double* x_real, int N,double EPS);
 
 
+
+typedef struct _ARGS
+{
+    int n;
+    double* A;
+    double* b;
+    double* x;
+    double EPS;
+    int thread_num;
+    int total_threads;
+
+}ARGS;
+
+static long int threads_total_time = 0;
+static pthread_mutex_t threads_total_time_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+#define N_TESTS 1
+void* solve_threaded(void* pa)
+{
+    ARGS *pargs = (ARGS*)pa;
+    long int t = get_time();
+    for(int i = 0; i< N_TESTS; i++)
+    {
+        Solve(pargs->n,pargs->A, pargs->b,pargs->x,pargs->EPS, pargs->thread_num,pargs->total_threads);
+    }
+    t = get_time() - t;
+
+    pthread_mutex_lock(&threads_total_time_mutex);
+    threads_total_time +=t;
+    pthread_mutex_unlock(&threads_total_time_mutex);
+
+    cout<<"thread "<<pargs->thread_num<<" finished, time = "<<t;
+    return 0;
+
+}
+
 int main(int argc, char* argv[])
 {
+    pthread_t *threads;
+    ARGS* args;
+
     double* A;
     double* b;
     double* x;
@@ -42,6 +83,18 @@ int main(int argc, char* argv[])
     if((k == 0)&&(argc == 6))
     {
         filename = argv[5];
+    }
+
+    if(!(threads = (pthread_t*) malloc (p * sizeof(pthread_t))))
+    {
+        cout<<"мало памяти"<<endl;
+        return -3;
+    }
+
+    if(!(args = (ARGS*) malloc (p* sizeof(ARGS))))
+    {
+        cout<<"мало памяти"<<endl;
+        return -4;
     }
 
     A = (double*) malloc(sizeof(double)*n*n);
@@ -82,7 +135,7 @@ int main(int argc, char* argv[])
         x_real[i] = (i+1)%2;
     }
 
-    cout<<nA<<endl;
+    //cout<<nA<<endl;
         if(abs(nA -1.0) > EPS)
         {
             cout<<"A--------"<<endl;
@@ -98,8 +151,8 @@ int main(int argc, char* argv[])
                b[i]/=nA;
            }
         }
-        cout<<nA/nA<<endl;
-        cout<<EPS<<endl;
+        //cout<<nA/nA<<endl;
+        //cout<<EPS<<endl;
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
     cout<<"b--------"<<endl;
@@ -107,6 +160,35 @@ int main(int argc, char* argv[])
     cout<<"x--------"<<endl;
     PrintMatrix(x, 1, n, m);
 
+    for(int i = 0; i< p; i++)
+    {
+        args[i].A = A;
+        args[i].b = b;
+        args[i].x = x;
+        args[i].EPS = EPS;
+        args[i].n = n;
+        args[i].thread_num = i;
+        args[i].total_threads = p;
+    }
+    //----------------------
+    for( int i = 0; i< p; i++)
+    {
+        if(pthread_create(threads+i, 0, solve_threaded,args+i))
+        {
+            cout<<"не получилось создать thread-"<<i<<endl;
+            return -10;
+        }
+    }
+    for( int i = 0; i< p; i++)
+    {
+        if(pthread_join(threads[i], 0))
+        {
+            cout<<"не получилось дождаться thread-"<<i<<endl;
+        }
+    }
+    //-------------------------
+    int t_full = get_full_time();
+    //t_full = get_full_time() -t_full
     int start = clock();
     int res = Solve(n, A, b, x,EPS);
     if(res == -1)
@@ -118,8 +200,11 @@ int main(int argc, char* argv[])
     cout<<"время работы(сотые доли сек.): "<<time<<endl;
 if(res == 0)
 {
-    printf("норма невязки:  %10.3e\n",norma_nevyaski(A,b,x,n,EPS));
-    printf("норма погрешности: %10.3e\n",norma_pogreshnosty(x,x_real, n,EPS));
+    double nn = norma_nevyaski(A,b,x,n,EPS);
+    double np = norma_pogreshnosty(x,x_real, n,EPS);
+
+    printf("норма невязки:  %10.3e\n",nn);
+    printf("норма погрешности: %10.3e\n",np);
 
     cout<<"b--------"<<endl;
     PrintMatrix(b, 1, n, m);
@@ -127,7 +212,12 @@ if(res == 0)
     PrintMatrix(x, 1, n, m);
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
+
+    printf("%s: residual = %e elapsed = %.2f s = %d n = %d m = %d p = %d\n",argv[0],nn, t_full,k,n ,m, p);
 }
+    free(threads);
+    free(args);
+
     free(A);
     free(b);
     free(x);
@@ -192,3 +282,4 @@ double norma_pogreshnosty(double* x,double* x_real, int N,double EPS)
     //cout<< "норма погрешности: "<<scientific<< norma<< endl; 
     return norma;
 }
+
