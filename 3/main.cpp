@@ -1,10 +1,12 @@
 
 #include "ReadMatrix.h"
 #include "Solve.h"
+#include "synchronize.h"
 #include "get_time.h"
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <stdio.h>
 #include <pthread.h>
 
 double norma_nevyaski(double* A, double*b, double* x, int N,double EPS);
@@ -21,28 +23,31 @@ typedef struct _ARGS
     double EPS;
     int thread_num;
     int total_threads;
+    int* err;
 
 }ARGS;
 
-static long int threads_total_time = 0;
-static pthread_mutex_t threads_total_time_mutex = PTHREAD_MUTEX_INITIALIZER;
+//static long int threads_total_time = 0;
+//static pthread_mutex_t threads_total_time_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #define N_TESTS 1
 void* solve_threaded(void* pa)
 {
     ARGS *pargs = (ARGS*)pa;
+    synchronize(pargs->total_threads);
     long int t = get_time();
     for(int i = 0; i< N_TESTS; i++)
     {
-        Solve(pargs->n,pargs->A, pargs->b,pargs->x,pargs->EPS, pargs->thread_num,pargs->total_threads);
+        Solve(pargs->n,pargs->A, pargs->b,pargs->x,pargs->EPS, pargs->thread_num,pargs->total_threads,pargs->err);
     }
     t = get_time() - t;
+    synchronize(pargs->total_threads);
+    //pthread_mutex_lock(&threads_total_time_mutex);
+    //threads_total_time +=t;
+    //pthread_mutex_unlock(&threads_total_time_mutex);
+    printf("thread %d finished, time = %ld\n",pargs->thread_num,t);
 
-    pthread_mutex_lock(&threads_total_time_mutex);
-    threads_total_time +=t;
-    pthread_mutex_unlock(&threads_total_time_mutex);
-
-    cout<<"thread "<<pargs->thread_num<<" finished, time = "<<t;
+    //cout<<"thread "<<pargs->thread_num<<" finished, time = "<<t<<endl;
     return 0;
 
 }
@@ -57,6 +62,7 @@ int main(int argc, char* argv[])
     double* x;
     double* x_real;
     double EPS = 1.e-14;
+    int err = 0;
     
     string filename;
 
@@ -107,6 +113,8 @@ int main(int argc, char* argv[])
     if(ReadMatrix(A,n,k, filename)!=0)
     {
         cout<<"ошибка чтения"<<endl;
+        free(threads);
+        free(args);
         free(A);
         free(b);
         free(x);
@@ -134,7 +142,6 @@ int main(int argc, char* argv[])
         x[i] = 0;
         x_real[i] = (i+1)%2;
     }
-
     //cout<<nA<<endl;
         if(abs(nA -1.0) > EPS)
         {
@@ -169,13 +176,24 @@ int main(int argc, char* argv[])
         args[i].n = n;
         args[i].thread_num = i;
         args[i].total_threads = p;
+        args[i].err = &err;
     }
+
     //----------------------
+    int t_full = get_full_time();
+    int start = clock();
     for( int i = 0; i< p; i++)
     {
         if(pthread_create(threads+i, 0, solve_threaded,args+i))
         {
             cout<<"не получилось создать thread-"<<i<<endl;
+            free(threads);
+            free(args);
+
+            free(A);
+            free(b);
+            free(x);
+            free(x_real);
             return -10;
         }
     }
@@ -187,24 +205,25 @@ int main(int argc, char* argv[])
         }
     }
     //-------------------------
-    int t_full = get_full_time();
-    //t_full = get_full_time() -t_full
-    int start = clock();
-    int res = Solve(n, A, b, x,EPS);
-    if(res == -1)
+    //int res = Solve(n, A, b, x,EPS);
+    if(err == -1)
     {
-        cout<<"делим на ноль. пришлось выйти"<<endl;
+       cout<<"делим на ноль. пришлось выйти"<<endl;
     }
+    t_full = get_full_time() -t_full;
     int end = clock(); 
     int time = (end - start)/(CLOCKS_PER_SEC/100);// время работы  в секундах
     cout<<"время работы(сотые доли сек.): "<<time<<endl;
-if(res == 0)
-{
+//if(res == 0)
+//{
     double nn = norma_nevyaski(A,b,x,n,EPS);
     double np = norma_pogreshnosty(x,x_real, n,EPS);
 
     printf("норма невязки:  %10.3e\n",nn);
     printf("норма погрешности: %10.3e\n",np);
+
+printf("%s: residual = %e elapsed = %d s = %d n = %d m = %d p = %d\n",argv[0],nn, t_full,k,n ,m, p);
+//}%.2f
 
     cout<<"b--------"<<endl;
     PrintMatrix(b, 1, n, m);
@@ -213,8 +232,7 @@ if(res == 0)
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
 
-    printf("%s: residual = %e elapsed = %.2f s = %d n = %d m = %d p = %d\n",argv[0],nn, t_full,k,n ,m, p);
-}
+    
     free(threads);
     free(args);
 
