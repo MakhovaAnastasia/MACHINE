@@ -34,17 +34,19 @@ typedef struct _ARGS
 void* solve_threaded(void* pa)
 {
     ARGS *pargs = (ARGS*)pa;
-    synchronize(pargs->total_threads);
+   // synchronize(pargs->total_threads);
     long int t = get_time();
     for(int i = 0; i< N_TESTS; i++)
     {
         Solve(pargs->n,pargs->A, pargs->b,pargs->x,pargs->EPS, pargs->thread_num,pargs->total_threads,pargs->err);
     }
     t = get_time() - t;
-    synchronize(pargs->total_threads);
+
+    //synchronize(pargs->total_threads);
     //pthread_mutex_lock(&threads_total_time_mutex);
     //threads_total_time +=t;
     //pthread_mutex_unlock(&threads_total_time_mutex);
+
     printf("thread %d finished, time = %ld\n",pargs->thread_num,t);
 
     //cout<<"thread "<<pargs->thread_num<<" finished, time = "<<t<<endl;
@@ -202,20 +204,28 @@ int main(int argc, char* argv[])
         if(pthread_join(threads[i], 0))
         {
             cout<<"не получилось дождаться thread-"<<i<<endl;
+            free(threads);
+            free(args);
+
+            free(A);
+            free(b);
+            free(x);
+            free(x_real);
+            return -10;
         }
     }
+    t_full -= get_full_time();
+    int end = clock();
     //-------------------------
-    //int res = Solve(n, A, b, x,EPS);
     if(err == -1)
     {
        cout<<"делим на ноль. пришлось выйти"<<endl;
     }
-    t_full = get_full_time() -t_full;
-    int end = clock(); 
+
     int time = (end - start)/(CLOCKS_PER_SEC/100);// время работы  в секундах
     cout<<"время работы(сотые доли сек.): "<<time<<endl;
-//if(res == 0)
-//{
+    if(err == 0)
+    {
     double nn = norma_nevyaski(A,b,x,n,EPS);
     double np = norma_pogreshnosty(x,x_real, n,EPS);
 
@@ -223,7 +233,7 @@ int main(int argc, char* argv[])
     printf("норма погрешности: %10.3e\n",np);
 
 printf("%s: residual = %e elapsed = %d s = %d n = %d m = %d p = %d\n",argv[0],nn, t_full,k,n ,m, p);
-//}%.2f
+}//%.2f
 
     cout<<"b--------"<<endl;
     PrintMatrix(b, 1, n, m);
