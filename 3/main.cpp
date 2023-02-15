@@ -1,21 +1,70 @@
 
 #include "ReadMatrix.h"
 #include "Solve.h"
+#include "synchronize.h"
+#include "get_time.h"
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <stdio.h>
+#include <pthread.h>
 
 double norma_nevyaski(double* A, double*b, double* x, int N,double EPS);
 double norma_pogreshnosty(double* x,double* x_real, int N,double EPS);
 
 
+
+typedef struct _ARGS
+{
+    int n;
+    double* A;
+    double* b;
+    double* x;
+    double EPS;
+    int thread_num;
+    int total_threads;
+    int* err;
+
+}ARGS;
+
+//static long int threads_total_time = 0;
+//static pthread_mutex_t threads_total_time_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+#define N_TESTS 1
+void* solve_threaded(void* pa)
+{
+    ARGS *pargs = (ARGS*)pa;
+   // synchronize(pargs->total_threads);
+    long int t = get_time();
+    for(int i = 0; i< N_TESTS; i++)
+    {
+        Solve(pargs->n,pargs->A, pargs->b,pargs->x,pargs->EPS, pargs->thread_num,pargs->total_threads,pargs->err);
+    }
+    t = get_time() - t;
+
+    //synchronize(pargs->total_threads);
+    //pthread_mutex_lock(&threads_total_time_mutex);
+    //threads_total_time +=t;
+    //pthread_mutex_unlock(&threads_total_time_mutex);
+
+    printf("thread %d finished, time = %ld\n",pargs->thread_num,t);
+
+    //cout<<"thread "<<pargs->thread_num<<" finished, time = "<<t<<endl;
+    return 0;
+
+}
+
 int main(int argc, char* argv[])
 {
+    pthread_t *threads;
+    ARGS* args;
+
     double* A;
     double* b;
     double* x;
     double* x_real;
     double EPS = 1.e-14;
+    int err = 0;
     
     string filename;
 
@@ -44,6 +93,18 @@ int main(int argc, char* argv[])
         filename = argv[5];
     }
 
+    if(!(threads = (pthread_t*) malloc (p * sizeof(pthread_t))))
+    {
+        cout<<"мало памяти"<<endl;
+        return -3;
+    }
+
+    if(!(args = (ARGS*) malloc (p* sizeof(ARGS))))
+    {
+        cout<<"мало памяти"<<endl;
+        return -4;
+    }
+
     A = (double*) malloc(sizeof(double)*n*n);
     if (A==NULL) exit (1);
     b = (double*) malloc(sizeof(double)*n);
@@ -54,6 +115,8 @@ int main(int argc, char* argv[])
     if(ReadMatrix(A,n,k, filename)!=0)
     {
         cout<<"ошибка чтения"<<endl;
+        free(threads);
+        free(args);
         free(A);
         free(b);
         free(x);
@@ -81,8 +144,7 @@ int main(int argc, char* argv[])
         x[i] = 0;
         x_real[i] = (i+1)%2;
     }
-
-    cout<<nA<<endl;
+    //cout<<nA<<endl;
         if(abs(nA -1.0) > EPS)
         {
             cout<<"A--------"<<endl;
@@ -98,8 +160,8 @@ int main(int argc, char* argv[])
                b[i]/=nA;
            }
         }
-        cout<<nA/nA<<endl;
-        cout<<EPS<<endl;
+        //cout<<nA/nA<<endl;
+        //cout<<EPS<<endl;
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
     cout<<"b--------"<<endl;
@@ -107,19 +169,71 @@ int main(int argc, char* argv[])
     cout<<"x--------"<<endl;
     PrintMatrix(x, 1, n, m);
 
-    int start = clock();
-    int res = Solve(n, A, b, x,EPS);
-    if(res == -1)
+    for(int i = 0; i< p; i++)
     {
-        cout<<"делим на ноль. пришлось выйти"<<endl;
+        args[i].A = A;
+        args[i].b = b;
+        args[i].x = x;
+        args[i].EPS = EPS;
+        args[i].n = n;
+        args[i].thread_num = i;
+        args[i].total_threads = p;
+        args[i].err = &err;
     }
-    int end = clock(); 
+
+    //----------------------
+    int t_full = get_full_time();
+    int start = clock();
+    for( int i = 0; i< p; i++)
+    {
+        if(pthread_create(threads+i, 0, solve_threaded,args+i))
+        {
+            cout<<"не получилось создать thread-"<<i<<endl;
+            free(threads);
+            free(args);
+
+            free(A);
+            free(b);
+            free(x);
+            free(x_real);
+            return -10;
+        }
+    }
+    for( int i = 0; i< p; i++)
+    {
+        if(pthread_join(threads[i], 0))
+        {
+            cout<<"не получилось дождаться thread-"<<i<<endl;
+            free(threads);
+            free(args);
+
+            free(A);
+            free(b);
+            free(x);
+            free(x_real);
+            return -10;
+        }
+    }
+    t_full -= get_full_time();
+    int end = clock();
+    //-------------------------
+    if(err == -1)
+    {
+       cout<<"делим на ноль. пришлось выйти"<<endl;
+    }
+
     int time = (end - start)/(CLOCKS_PER_SEC/100);// время работы  в секундах
     cout<<"время работы(сотые доли сек.): "<<time<<endl;
-if(res == 0)
-{
-    printf("норма невязки:  %10.3e\n",norma_nevyaski(A,b,x,n,EPS));
-    printf("норма погрешности: %10.3e\n",norma_pogreshnosty(x,x_real, n,EPS));
+    if(err == 0)
+    {
+    double nn = norma_nevyaski(A,b,x,n,EPS);
+    double np = norma_pogreshnosty(x,x_real, n,EPS);
+
+    printf("норма невязки:  %10.3e\n",nn);
+    printf("норма погрешности: %10.3e\n",np);
+
+printf("%s: residual = %e elapsed = %d s = %d n = %d m = %d p = %d\n",argv[0],nn, t_full,k,n ,m, p);
+}//%.2f
 
     cout<<"b--------"<<endl;
     PrintMatrix(b, 1, n, m);
@@ -127,7 +241,11 @@ if(res == 0)
     PrintMatrix(x, 1, n, m);
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
-}
+
+    
+    free(threads);
+    free(args);
+
     free(A);
     free(b);
     free(x);
@@ -192,3 +310,4 @@ double norma_pogreshnosty(double* x,double* x_real, int N,double EPS)
     //cout<< "норма погрешности: "<<scientific<< norma<< endl; 
     return norma;
 }
+

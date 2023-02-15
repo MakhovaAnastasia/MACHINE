@@ -5,8 +5,8 @@
 #include <ctime>
 #include <cstdlib>
 
-double n_1(double* A, double* x, int N);
-double n_2(double* A, double* x, int N);
+double n_1(double* A, double* x, int N, double EPS);
+double n_2(double* A, double* x, int N, double EPS);
 
 
 int main(int argc, char* argv[])
@@ -83,8 +83,8 @@ int main(int argc, char* argv[])
 
 if(res == 0)
 {
-    printf("невязка в первом инварианте:  %10.3e\n",n_1(A,x,n));
-    printf("невязка во втором инварианте: %10.3e\n",n_2(A,x,n));
+    printf("невязка в первом инварианте:  %10.3e\n",n_1(A,x,n,EPS));
+    printf("невязка во втором инварианте: %10.3e\n",n_2(A,x,n,EPS));
 
     cout<<"x(собственные значения)--------"<<endl;
     PrintMatrix(x, 1, n, m);
@@ -111,17 +111,21 @@ if(res>0)
     return 0;
 }
 
-double n_1(double* A, double* x, int N)
+double n_1(double* A, double* x, int N, double EPS)
 {
     double sum = 0.;
     for(int i  = 0; i< N; i++)
     {
         sum+=(A[N*i+i] - x[i]);
     }
+    if(abs(sum) < EPS)
+    {
+        return 0;
+    }
     return abs(sum);
 }
 
-double n_2(double* A, double* x, int N)
+double n_2(double* A, double* x, int N, double EPS)
 {
     double length = 0.;
     double sz = 0.;
@@ -134,6 +138,10 @@ double n_2(double* A, double* x, int N)
         }
     }
     length = sqrt(length);
+    if(abs(length - sz) < EPS)
+    {
+        return 0;
+    }
 
     return abs(length - sz);
 }

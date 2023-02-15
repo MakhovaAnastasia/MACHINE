@@ -5,10 +5,10 @@
 # запуска отладчика vscode
 #	g++ Solve.cpp ReadMatrix.cpp PrintMatrix.cpp main.cpp -g -o Proga.out
 
-CC=g++
-CFLAGS=-c -g -O3 -Wall
+CC=g++ -pthread
+CFLAGS=-c -g -Wall 
 LDFLAGS=
-SOURCES=Solve.cpp ReadMatrix.cpp PrintMatrix.cpp main.cpp
+SOURCES=Solve.cpp synchronize.cpp get_time.cpp ReadMatrix.cpp PrintMatrix.cpp main.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=hello
 
