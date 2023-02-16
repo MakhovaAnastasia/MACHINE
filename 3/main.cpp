@@ -20,6 +20,8 @@ typedef struct _ARGS
     double* A;
     double* b;
     double* x;
+        double* Cos_p;
+        double* Sin_p;
     double EPS;
     int thread_num;
     int total_threads;
@@ -35,7 +37,7 @@ void* solve_threaded(void* pa)
 {
     ARGS *pargs = (ARGS*)pa;
     long int t = get_time();
-         int err_code = Solve(pargs->n,pargs->A, pargs->b,pargs->x,pargs->EPS, pargs->thread_num,pargs->total_threads);
+         int err_code = Solve(pargs->n,pargs->A, pargs->b,pargs->x,pargs->EPS, pargs->thread_num,pargs->total_threads, pargs->Cos_p, pargs->Sin_p);
     t = get_time() - t;
     pargs[0].err = err_code;
 
@@ -52,8 +54,10 @@ int main(int argc, char* argv[])
     double* A;
     double* b;
     double* x;
+    double* Cos_p;
+    double* Sin_p;
     double* x_real;
-    double EPS = 1.e-14;
+    double EPS = 1.e-24;
     int err = 0;
     
     string filename;
@@ -100,6 +104,8 @@ int main(int argc, char* argv[])
     b = (double*) malloc(sizeof(double)*n);
     x = (double*) malloc(sizeof(double)*n);
     x_real = (double*) malloc(sizeof(double)*n);
+    Cos_p = (double*) malloc(sizeof(double)*n);
+    Sin_p = (double*) malloc(sizeof(double)*n);
 
     
     if(ReadMatrix(A,n,k, filename)!=0)
@@ -111,6 +117,8 @@ int main(int argc, char* argv[])
         free(b);
         free(x);
         free(x_real);
+        free(Cos_p);
+        free(Sin_p);
         return 0;
     }
     double nA = 0;
@@ -133,7 +141,22 @@ int main(int argc, char* argv[])
 
         x[i] = 0;
         x_real[i] = (i+1)%2;
+        Cos_p[i] = 0;
+        Sin_p[i] = 0;
     }
+if(abs(nA)<EPS)
+{
+    printf("zero norma\n");
+    free(threads);
+    free(args);
+    free(A);
+    free(b);
+    free(x);
+    free(x_real);
+    free(Cos_p);
+    free(Sin_p);
+    return 1;
+}
     //cout<<nA<<endl;
         if(abs(nA -1.0) > EPS)
         {
@@ -145,7 +168,8 @@ int main(int argc, char* argv[])
            {
                for(int j = 0 ;j <n; j++)
                {
-                   A[n*i+j]/=nA;
+                   //if(abs(nA)  EPS)
+                    A[n*i+j]/=nA;
                }
                b[i]/=nA;
            }
@@ -169,6 +193,8 @@ int main(int argc, char* argv[])
         args[i].thread_num = i;
         args[i].total_threads = p;
         args[i].err = err;
+        args[i].Cos_p = Cos_p;
+        args[i].Sin_p = Sin_p;
     }
 
     //----------------------
@@ -186,6 +212,8 @@ int main(int argc, char* argv[])
             free(b);
             free(x);
             free(x_real);
+            free(Cos_p);
+            free(Sin_p);
             return -10;
         }
     }
@@ -201,6 +229,8 @@ int main(int argc, char* argv[])
             free(b);
             free(x);
             free(x_real);
+            free(Cos_p);
+            free(Sin_p);
             return -10;
         }
     }
@@ -224,7 +254,7 @@ int main(int argc, char* argv[])
     printf("норма невязки:  %10.3e\n",nn);
     printf("норма погрешности: %10.3e\n",np);
 }//%.2f
-printf("%s: residual = %e elapsed = %d s = %d n = %d m = %d p = %d\n",argv[0],nn, t_full,k,n ,m, p);
+printf("%s: residual = %e elapsed = %.2f s = %d n = %d m = %d p = %d\n",argv[0],nn,(double) t_full/100.,k,n ,m, p);
 
 
     cout<<"b--------"<<endl;
@@ -233,7 +263,6 @@ printf("%s: residual = %e elapsed = %d s = %d n = %d m = %d p = %d\n",argv[0],nn
     PrintMatrix(x, 1, n, m);
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
-
     
     free(threads);
     free(args);
@@ -242,6 +271,8 @@ printf("%s: residual = %e elapsed = %d s = %d n = %d m = %d p = %d\n",argv[0],nn
     free(b);
     free(x);
     free(x_real);
+    free(Cos_p);
+    free(Sin_p);
     return 0;
 }
 
