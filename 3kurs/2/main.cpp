@@ -73,9 +73,13 @@ int main(int argc, char* argv[])
 
     int start = clock();
     int res = Solve(n, A, x, EPS, Q_cos, Q_sin);
+    //if(res == -2)
+    //{
+     //   cout<<"алгоритм не сходится  за малое время или есть комплексные корни "<<endl;
+    //}
     if(res == -1)
     {
-        cout<<"делим на ноль. пришлось выйти"<<endl;
+        cout<<"делим на ноль. пришлось выйти или алгоритм не сходится  за малое время или есть комплексные корни"<<endl;
     }
     int end = clock(); 
     int time = (end - start)/(CLOCKS_PER_SEC/100);// время работы  в секундах
@@ -87,7 +91,7 @@ if(res == 0)
     printf("невязка во втором инварианте: %10.3e\n",n_2(A,x,n,EPS));
 
     cout<<"x(собственные значения)--------"<<endl;
-    PrintMatrix(x, 1, n, m);
+    PrintMatrix(x, 1, n, n);
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
 }
@@ -97,8 +101,8 @@ if(res>0)
     //printf("невязка во втором инварианте: %10.3e\n",n_2(A,x,n));
 
     cout<<"x(собственные значения)"<<res<<" шт.--------"<<endl;
-    PrintMatrix(x, 1, res, m);
-    PrintMatrix(x, 1, n, m);
+    PrintMatrix(x, 1, n, n);
+    PrintMatrix(x, 1, n, n);
     cout<<"A--------"<<endl;
     PrintMatrix(A, n, n, m);
 }

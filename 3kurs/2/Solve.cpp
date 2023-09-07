@@ -169,7 +169,7 @@ int Solve(const int n,double* A,double* x, double EPS, double* Q_cos, double* Q_
     }while((k > 1)&&(steps < 1000));
     if((k>1)&&(steps >= 1000))
     {
-        return -2;//не сходится быстро
+        return -1;//не сходится быстро
     }
     }
     if(n>1)

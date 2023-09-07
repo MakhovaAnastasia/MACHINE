@@ -36,6 +36,7 @@ double f(int K,int N,int i,int j)
             break;
 
         case(3):
+        if(i==N -1) return 0;
             r = abs(i-j);
             break;
 
