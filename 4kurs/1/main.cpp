@@ -206,103 +206,23 @@ int Pn(long double* XX, long double* P,long double* A,long double* c,int n, long
         P[i]/= A[i*n +i];
     }
     //Solve(n, A, c, P, EPS );
+    for(int j = 0; j<n;j++)
+    {
+        A[j] = P[j];
+    }
+
+    for(int i = 0; i<= 3*(n-1);i++)
+    {
+        long double power = 1;
+        for(int j = 0; j < n; j++)
+        {
+            P[i]+=A[j]*power;
+            power*=XX[i];
+        }
+    }
 
     return 0;
 }
-
-int Solve(int n, long double* A,long double* c,long double* P,long double EPS)
-{
-    //умножаем слева на Tij
-    for( int i = 0; i < n-1; i++)
-    {
-        for(int j = i+1; j < n; j++)
-        {
-            int res  = TA(i,j, A,c, n,EPS); //Tij*A Tij*b
-            if(res == -1)
-            {
-                return -1;
-            }
-        }
-    }
-    // обратный ход метода Гаусса
-    for( int i = n-1; i >= 0; i--)
-    {
-        P[i] = c[i];
-        for(int j = i+1; j < n; j++)
-        {
-            P[i] -= A[i*n +j]* P[j];
-        }
-        //if(abs(A[i*n + i]) < EPS) //на диагонали  нашли 0. матрица вырождена
-        //{
-        //    //cout<<"нет точного ответа. x["<<i<<"] = 1 "<<endl;
-        //    return -1;
-        //}
-        //else{
-            P[i]/= A[i*n +i];
-        //}
-        //if((abs(P[i]))<EPS)
-        //{
-        //    P[i] = 0;
-        //}
-    }
-    return 0;
-}
-
-int TA(int i, int j, long double* A, long double*c, int n,long double EPS)
-{
-    //определим угол поворота
-    long double x = A[i*n + i];
-    long double y = A[j*n + i];//[i*n + j];
-    long double root = sqrt(x*x + y*y);
-    //if(abs(root) < EPS)
-    //{
-    //    return -1;
-    //}
-    long double cos_phi = x / root;
-    long double sin_phi =  -y / root;
-    long double xi = 0;
-    long double xj = 0;
-        //Tb
-    xi = c[i];
-    xj = c[j];
-
-    c[i] = xi*cos_phi - xj*sin_phi;
-    c[j] = xi*sin_phi + xj*cos_phi;
-    //if(abs(c[i])< EPS)   c[i] = 0.0;
-    //if(abs(c[j])< EPS)   c[j] = 0.0;
-    //умножение TA
-
-    for(int k = i; k < n; k++) //столбцы А
-    {
-        xi = A[i*n+k];
-        xj = A[j*n + k];
-        if(k==i)
-        {
-            A[i*n + i] = root;
-            //if(abs(A[i*n + i]) < EPS)
-            //{
-            //    A[i*n + i] = 0;
-            //}
-            A[j*n + i] = 0;
-        }
-        else
-        {
-            A[i*n + k] = xi*cos_phi - xj*sin_phi;
-            //if(abs(A[i*n + k]) < EPS)
-            //{
-            //    A[i*n + k] = 0;
-            //}
-
-            A[j*n + k] = xi*sin_phi + xj*cos_phi;
-            //if(abs(A[j*n + k]) < EPS)
-            //{
-            //    A[j*n + k] = 0;
-            //}
-        }
-    }
-    return 0;
-}
-
 
 int Ln(long double* XX, long double* L,int n)
 {
@@ -336,9 +256,9 @@ long double PHI(long double* XX,int i, int j, int n)
 
 long double f(long double x)
 {
-    return x/2 + 10;
-    //return abs(x);
-
+    //return x/2 + 10;
+    return abs(x);
+    //return 1/(1+25*x*x);
 }
 
 int Write1(long double* X, int n)
@@ -347,10 +267,10 @@ int Write1(long double* X, int n)
     out.open("1.txt");
     if(out.is_open())
     {
-        cout<<setprecision(15); // 
+        out<<setprecision(15)<<fixed;
         for(int i = 0; i < n; i++)
         {
-            out<<setprecision(15)<< setw(20)<<X[i]<<setprecision(15)<< setw(20)<<f(X[i])<<endl;
+            out<<setw(25)<<X[i]<<setw(25)<<f(X[i])<<endl;
         }
         out. close();
         return 0;
@@ -365,13 +285,10 @@ int Write2(long double* XX, long double* P, long double* L, int n)
     out.open("2.txt");
     if(out.is_open())
     {
-        cout<<setprecision(15); // 
+        out<<setprecision(15)<<fixed;
         for(int i = 0; i <3*n-2; i++)
         {
-            out<<setprecision(15)<< setw(25)<<XX[i]
-            <<setprecision(15)<< setw(25)<<L[i]
-            <<setprecision(15)<< setw(25)<<P[i]
-            <<setprecision(15)<< setw(25)<<f(XX[i])<<endl;
+            out<<setw(25)<<XX[i]<<setw(25)<<L[i]<<setw(25)<<P[i]<<setw(25)<<f(XX[i])<<endl;
         }
         out. close();
         return 0;
