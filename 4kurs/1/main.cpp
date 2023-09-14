@@ -10,19 +10,17 @@
 
 using namespace std;
 
-long double f(long double x);
-int first_table(long double* X, long double a, long double b, int n, int k);
+long double f(long double x); //функция
+int first_table(long double* X, long double a, long double b, int n, int k); //создаем первый файл
 int second_table(long double*X,long double*XX,long double*P,
                 long double* A,long double* c,
-                long double*L, long double a, long double b, int n,long double EPS);
-int Write1(long double* X, int n);
-int Write2(long double* XX, long double* P, long double* L, int n);
-int Generate(long double* X, int a, int b, int n, int k);
-int Ln(long double* XX, long double* L,int n);
-int Pn(long double* XX, long double* P,long double* A,long double* c,int n,long double EPS);
-long double PHI(long double* XX,int i, int j, int n);
-int Solve(int n, long double* A,long double* c,long double* P,long double EPS);
-int TA(int i, int j, long double* A, long double*c, int n,long double EPS);
+                long double*L, long double a, long double b, int n,long double EPS); //создаем второй файл
+int Write1(long double* X, int n); //вывод в первый файл
+int Write2(long double* XX, long double* P, long double* L, int n);//вывод во второй
+int Generate(long double* X, int a, int b, int n, int k); //создадим узлы x_i
+int Ln(long double* XX, long double* L,int n); //считаем полином в форме Лагранжа
+int Pn(long double* XX, long double* P,long double* A,long double* c,int n,long double EPS); //считаем полином в алгебраической форме
+long double PHI(long double* XX,int i, int j, int n); //функция Ф
 
 int main(int argc, char* argv[])
 {
@@ -112,10 +110,6 @@ int Generate(long double* X, int a, int b, int n, int k)
         {
             X[n-1-i] = (a+b)/2.0 + (b-a)* cosl((2.*i+1.)* M_PI / (2.0*n) )/2.0;
         }
-        for(int i = 0; i< n; i++)
-        {
-            cout<<X[i]<<endl;
-        }
         return 2;
     }
     if(k==3) // случайные
@@ -163,7 +157,7 @@ int second_table(long double*X,long double*XX,long double*P,
 
 int Pn(long double* XX, long double* P,long double* A,long double* c,int n, long double EPS)
 {
-    //matrix
+    //матрица Ван дер Монда
     for(int i = 0; i < n; i++)
     {
         for(int j = 0; j < n; j++)
@@ -180,6 +174,7 @@ int Pn(long double* XX, long double* P,long double* A,long double* c,int n, long
         c[i] = f(XX[i*3]);
     }
 
+    //прямой ход метода Гаусса
     for(int j = 0; j<n;j++)
     {
         for(int i = j+1;i<n;i++)
@@ -205,7 +200,8 @@ int Pn(long double* XX, long double* P,long double* A,long double* c,int n, long
         }
         P[i]/= A[i*n +i];
     }
-    //Solve(n, A, c, P, EPS );
+
+    //считаем значения в точках
     for(int j = 0; j<n;j++)
     {
         A[j] = P[j];
@@ -256,9 +252,10 @@ long double PHI(long double* XX,int i, int j, int n)
 
 long double f(long double x)
 {
-    //return x/2 + 10;
-    return abs(x);
-    //return 1/(1+25*x*x);
+    //return -x*x*x + 4*x*x+ x-8;
+
+    //return abs(x);
+    return 1/(1+25*x*x);
 }
 
 int Write1(long double* X, int n)
