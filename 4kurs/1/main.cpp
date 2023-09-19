@@ -73,6 +73,8 @@ int main(int argc, char* argv[])
     free(XX);
     free(P);
     free(L);
+    free(A);
+    free(c);
 
     return 0;
 }
@@ -141,11 +143,12 @@ int second_table(long double*X,long double*XX,long double*P,
         
     }
     XX[3*(n-1)] = X[n-1];
+    //L
+    Ln(XX,L,n);
 
     //P
     Pn(XX, P, A, c, n);
-    //L
-    Ln(XX,L,n);
+
 
     //запишем в файл результат
     
@@ -209,10 +212,11 @@ int Pn(long double* XX, long double* P,long double* A,long double* c,int n)
     for(int i = 0; i<= 3*(n-1);i++)
     {
         long double power = 1.;
+        P[i] = 0;
         for(int j = 0; j < n; j++)
         {
-            P[i]= P[i]+(A[j]*power);
-            power= power* XX[i];
+            P[i]+= A[j]*power;
+            power*= XX[i];
         }
     }
 
@@ -253,8 +257,8 @@ long double f(long double x)
 {
     //return -x*x*x + 4*x*x+ x-8;
 
-    //return abs(x);
-    return 1/(1+25*x*x);
+    return abs(x);
+    //return 1/(1+25*x*x);
 }
 
 int Write1(long double* X, int n)
