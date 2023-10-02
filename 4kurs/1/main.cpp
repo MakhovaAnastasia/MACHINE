@@ -14,17 +14,16 @@ long double f(long double x); //функция
 int first_table(long double* X, long double a, long double b, int n, int k); //создаем первый файл
 int second_table(long double*X,long double*XX,long double*P,
                 long double* A,long double* c,
-                long double*L, long double a, long double b, int n,long double EPS); //создаем второй файл
+                long double*L, int n); //создаем второй файл
 int Write1(long double* X, int n); //вывод в первый файл
 int Write2(long double* XX, long double* P, long double* L, int n);//вывод во второй
 int Generate(long double* X, int a, int b, int n, int k); //создадим узлы x_i
 int Ln(long double* XX, long double* L,int n); //считаем полином в форме Лагранжа
-int Pn(long double* XX, long double* P,long double* A,long double* c,int n,long double EPS); //считаем полином в алгебраической форме
+int Pn(long double* XX, long double* P,long double* A,long double* c,int n); //считаем полином в алгебраической форме
 long double PHI(long double* XX,int i, int j, int n); //функция Ф
 
 int main(int argc, char* argv[])
 {
-    long double EPS = 1.e-24;
     long double* X, *XX, *P, *L, *A, *c;
     long double a = 0; //отрезок [a,b]
     long double b = 0; 
@@ -68,12 +67,14 @@ int main(int argc, char* argv[])
     first_table(X, a, b, n, k);
 
     // 2-ая таблица
-    second_table(X, XX, P, A, c, L, a, b, n,EPS);
+    second_table(X, XX, P, A, c, L, n);
 
     free(X);
     free(XX);
     free(P);
     free(L);
+    free(A);
+    free(c);
 
     return 0;
 }
@@ -130,7 +131,7 @@ int Generate(long double* X, int a, int b, int n, int k)
 
 int second_table(long double*X,long double*XX,long double*P,
                 long double* A,long double* c,
-                long double*L, long double a, long double b, int n,long double EPS)
+                long double*L, int n)
 {
      //создаем доп узлы
     for(int i = 0; i < n-1; i++)
@@ -142,11 +143,12 @@ int second_table(long double*X,long double*XX,long double*P,
         
     }
     XX[3*(n-1)] = X[n-1];
-
-    //P
-    Pn(XX, P, A, c, n, EPS);
     //L
     Ln(XX,L,n);
+
+    //P
+    Pn(XX, P, A, c, n);
+
 
     //запишем в файл результат
     
@@ -155,7 +157,7 @@ int second_table(long double*X,long double*XX,long double*P,
     return 0;
 }
 
-int Pn(long double* XX, long double* P,long double* A,long double* c,int n, long double EPS)
+int Pn(long double* XX, long double* P,long double* A,long double* c,int n)
 {
     //матрица Ван дер Монда
     for(int i = 0; i < n; i++)
@@ -209,11 +211,12 @@ int Pn(long double* XX, long double* P,long double* A,long double* c,int n, long
 
     for(int i = 0; i<= 3*(n-1);i++)
     {
-        long double power = 1;
+        long double power = 1.;
+        P[i] = 0;
         for(int j = 0; j < n; j++)
         {
-            P[i]+=A[j]*power;
-            power*=XX[i];
+            P[i]+= A[j]*power;
+            power*= XX[i];
         }
     }
 
@@ -254,8 +257,8 @@ long double f(long double x)
 {
     //return -x*x*x + 4*x*x+ x-8;
 
-    //return abs(x);
-    return 1/(1+25*x*x);
+    return abs(x);
+    //return 1/(1+25*x*x);
 }
 
 int Write1(long double* X, int n)
