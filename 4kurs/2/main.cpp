@@ -15,12 +15,12 @@ using namespace std;
 long double f(long double x); //функция
 int Generate_x(long double* X, int N); //создаем узлы сетки
 int Get_Coef(long double *C, int N); //получаем коэфициенты с_m
-long double dot_f_phi(int N); //скалярное произведение f и phi_m
-long double dot_phi_phi(int N); // скалярное произведение phi_m и phi_m
+long double dot_f_phi(int N, int j); //скалярное произведение f и phi_m
+long double dot_phi_phi(int N, int j); // скалярное произведение phi_m и phi_m
 long double fourier(long double* C, int N, long double x); //значение ряда фурье в точке x
 int Write(long double* X, int N, long double* C); //выведем в файл X, f(X), fourier(X), |f(X) - fourier(X)|
 
-
+//plot '1.txt' using 1:2 with linespoints, '1.txt' using 1:3 with lines
 
 int main(int argc, char* argv[])
 {
@@ -71,30 +71,30 @@ int Get_Coef(long double *C, int N)
 
     for(int i = 1; i < N; i++)
     {
-        C[i] = dot_f_phi(N)/dot_phi_phi(N);
+        C[i] = dot_f_phi(N,i)/dot_phi_phi(N,i);
     }
     return 1;
 }
 
-long double dot_f_phi(int N)
+long double dot_f_phi(int N, int j)
 {
     long double res = 0.0;
     {
-        for(int i = 1; i < N; i++)
+        for(int i = 0; i <= N; i++)
         {
-            res += f(i/(long double)N) * cos(M_PI*(i/(long double)N)/2.0);
+            res += f(i/(long double)N) * cos(M_PI*j*(i/(long double)N)/2.0) / (long double)N;
         }
     }
     return res;
 }
 
-long double dot_phi_phi(int N)
+long double dot_phi_phi(int N, int j)
 {
     long double res = 0.0;
     {
-        for(int i = 1; i < N; i++)
+        for(int i = 0; i <= N; i++)
         {
-            res += cos(M_PI*(i/(long double)N)/2.0) * cos(M_PI*(i/(long double)N)/2.0);
+            res += cos(M_PI*j*(i/(long double)N)/2.0) * cos(M_PI*j*(i/(long double)N)/2.0)/ (long double)N;
         }
     }
     return res;
@@ -106,7 +106,7 @@ long double fourier(long double* C, int N, long double x)
     {
         for(int i = 1; i < N; i++)
         {
-            res += C[i] * cos(M_PI*x/2.0);
+            res += C[i] * cos(M_PI*i*x/2.0);
         }
     }
     return res;
@@ -116,7 +116,8 @@ long double fourier(long double* C, int N, long double x)
 long double f(long double x)
 {
     //return  -x +1;
-    return -(x*x)+1;
+    //return -(x*x)+1;
+    return cos(M_PI*x/2.0);
 }
 
 int Write(long double* X, int N, long double* C)
@@ -125,11 +126,18 @@ int Write(long double* X, int N, long double* C)
     out.open("1.txt");
     if(out.is_open())
     {
+        long double max = 0;
+
         out<<setprecision(15)<<fixed;
         for(int i = 0; i < N+1; i++)
         {
-            out<<setw(25)<<X[i]<<setw(25)<<f(X[i])<<setw(25)<<fourier(C,N,X[i])<<setw(25)<<fabs(f(X[i]) - fourier(C,N,X[i]))<<endl;
+            if(max < fabs(f(X[i]) - fourier(C,N,X[i])))
+            {
+                max = fabs(f(X[i]) - fourier(C,N,X[i]));
+            }
+            out<<setw(25)<<C[i]<<setw(25)<<X[i]<<setw(25)<<f(X[i])<<setw(25)<<fourier(C,N,X[i])<<setw(25)<<fabs(f(X[i]) - fourier(C,N,X[i]))<<endl;
         }
+        out<<max<<endl;
         out. close();
         return 0;
     }
