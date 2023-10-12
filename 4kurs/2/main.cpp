@@ -11,7 +11,7 @@
 using namespace std;
 
 // вариант 1000
-
+int find_p();
 long double f(long double x); //функция
 int Generate_x(long double* X, int N); //создаем узлы сетки
 int Get_Coef(long double *C, int N); //получаем коэфициенты с_m
@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
         return -1;
     }
     
-    C = (long double*) malloc(sizeof(long double)*(N+1));
+    C = (long double*) malloc(sizeof(long double)*(N));
     X = (long double*) malloc(sizeof(long double)*(N+1));
 
     Generate_x(X, N);
@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
 
 int Generate_x(long double* X, int N)
 {
-    for(int i = 0; i <= N; i++)
+    for(int i = 0; i < N; i++)
     {
         X[i] = i*(1/(long double)N) ;
     }
@@ -66,12 +66,9 @@ int Generate_x(long double* X, int N)
 
 int Get_Coef(long double *C, int N)
 {
-    C[0] = 0;
-    C[N] = 0;
-
-    for(int i = 1; i < N; i++)
+    for(int i = 0; i < N; i++)
     {
-        C[i] = dot_f_phi(N,i)/dot_phi_phi(N,i);
+        C[i] = dot_f_phi(N,i)/dot_phi_phi(N,i)/2;
     }
     return 1;
 }
@@ -79,11 +76,11 @@ int Get_Coef(long double *C, int N)
 long double dot_f_phi(int N, int j)
 {
     long double res = 0.0;
+    long double h = 1/(long double)N;
+    res += f(0) * cos(M_PI*j*(0)/2.0) *h /2;
+    for(int i = 1; i < N; i++)
     {
-        for(int i = 0; i <= N; i++)
-        {
-            res += f(i/(long double)N) * cos(M_PI*j*(i/(long double)N)/2.0) / (long double)N;
-        }
+       res += f(i*h) * cos(M_PI*j*(i*h)/2.0) *h;
     }
     return res;
 }
@@ -91,11 +88,10 @@ long double dot_f_phi(int N, int j)
 long double dot_phi_phi(int N, int j)
 {
     long double res = 0.0;
+    long double h = 1/(long double)N;
+    for(int i = 0; i <N; i++)
     {
-        for(int i = 0; i <= N; i++)
-        {
-            res += cos(M_PI*j*(i/(long double)N)/2.0) * cos(M_PI*j*(i/(long double)N)/2.0)/ (long double)N;
-        }
+        res += cos(M_PI*j*(i*h )/2.0) * cos(M_PI*j*(i*h)/2.0) *h;
     }
     return res;
 }
@@ -103,11 +99,9 @@ long double dot_phi_phi(int N, int j)
 long double fourier(long double* C, int N, long double x)
 {
     long double res = 0.0;
+    for(int i = 0; i < N; i++)
     {
-        for(int i = 1; i < N; i++)
-        {
-            res += C[i] * cos(M_PI*i*x/2.0);
-        }
+        res += C[i] * cos(M_PI*i*x/2.0);
     }
     return res;
 }
@@ -116,31 +110,49 @@ long double fourier(long double* C, int N, long double x)
 long double f(long double x)
 {
     //return  -x +1;
-    //return -(x*x)+1;
-    return cos(M_PI*x/2.0);
+    return -(x*x)+1;
+    //return cos(5*M_PI*x/2.0);
 }
 
 int Write(long double* X, int N, long double* C)
 {
     ofstream out;
     out.open("1.txt");
+    long double max = 0;
     if(out.is_open())
     {
-        long double max = 0;
-
         out<<setprecision(15)<<fixed;
-        for(int i = 0; i < N+1; i++)
+        for(int i = 0; i < N; i++)
         {
             if(max < fabs(f(X[i]) - fourier(C,N,X[i])))
             {
                 max = fabs(f(X[i]) - fourier(C,N,X[i]));
             }
-            out<<setw(25)<<C[i]<<setw(25)<<X[i]<<setw(25)<<f(X[i])<<setw(25)<<fourier(C,N,X[i])<<setw(25)<<fabs(f(X[i]) - fourier(C,N,X[i]))<<endl;
+            out<<setw(25)<<X[i]<<setw(25)<<f(X[i])<<setw(25)<<fourier(C,N,X[i])<<setw(25)<<fabs(f(X[i]) - fourier(C,N,X[i]))<<endl;
         }
-        out<<max<<endl;
+        cout<<setw(25)<<N<<setw(25)<<log((long double)N)<<setw(25)<<log(1/max)<<endl;
         out. close();
+        return max;
+    }
+    out.close();
+    return -1;
+}
+
+int find_p()
+{
+    ofstream out;
+    out.open("2.txt");
+    if(out.is_open())
+    {
+        out<<setprecision(15)<<fixed;
+        for(int i = 0; i < 5; i++)
+        {
+            out<<0.00499905/0.00249988<<endl;
+        }
+        out.close();
         return 0;
     }
     out. close();
     return -1;
 }
+
