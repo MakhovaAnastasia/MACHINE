@@ -66,9 +66,10 @@ int Generate_x(long double* X, int N)
 
 int Get_Coef(long double *C, int N)
 {
-    for(int i = 0; i < N; i++)
+    C[0] = 0;
+    for(int i = 1; i < N; i++)
     {
-        C[i] = dot_f_phi(N,i)/dot_phi_phi(N,i)/2;
+        C[i] = dot_f_phi(N,i)*2.0;//;  /dot_phi_phi(N,i)/2.0
     }
     return 1;
 }
@@ -77,31 +78,32 @@ long double dot_f_phi(int N, int j)
 {
     long double res = 0.0;
     long double h = 1/(long double)N;
-    res += f(0) * cos(M_PI*j*(0)/2.0) *h /2;
+    res += f(0.) * cos(0.) /2.0;
     for(int i = 1; i < N; i++)
     {
-       res += f(i*h) * cos(M_PI*j*(i*h)/2.0) *h;
+       res += f(i*h) * cos(M_PI*(j-0.5)*(i*h));
     }
-    return res;
+    return res*h;
 }
 
 long double dot_phi_phi(int N, int j)
 {
     long double res = 0.0;
     long double h = 1/(long double)N;
-    for(int i = 0; i <N; i++)
+    res += cos(0.) * cos(0.) /2.0;
+    for(int i = 1; i < N; i++)
     {
-        res += cos(M_PI*j*(i*h )/2.0) * cos(M_PI*j*(i*h)/2.0) *h;
+        res += cos(M_PI*(j-0.5)*(i*h )) * cos(M_PI*(j-0.5)*(i*h));
     }
-    return res;
+    return res*h;
 }
 
 long double fourier(long double* C, int N, long double x)
 {
     long double res = 0.0;
-    for(int i = 0; i < N; i++)
+    for(int i = 1; i < N; i++)
     {
-        res += C[i] * cos(M_PI*i*x/2.0);
+        res += C[i] * cos(M_PI*(i-0.5)*x);
     }
     return res;
 }
@@ -110,8 +112,9 @@ long double fourier(long double* C, int N, long double x)
 long double f(long double x)
 {
     //return  -x +1;
-    return -(x*x)+1;
+    //return -(x*x)+1;
     //return cos(5*M_PI*x/2.0);
+    return cos(M_PI*x*(1-0.5));
 }
 
 int Write(long double* X, int N, long double* C)
@@ -128,6 +131,7 @@ int Write(long double* X, int N, long double* C)
             {
                 max = fabs(f(X[i]) - fourier(C,N,X[i]));
             }
+            cout<<C[i]<<endl;
             out<<setw(25)<<X[i]<<setw(25)<<f(X[i])<<setw(25)<<fourier(C,N,X[i])<<setw(25)<<fabs(f(X[i]) - fourier(C,N,X[i]))<<endl;
         }
         cout<<setw(25)<<N<<setw(25)<<log((long double)N)<<setw(25)<<log(1/max)<<endl;
