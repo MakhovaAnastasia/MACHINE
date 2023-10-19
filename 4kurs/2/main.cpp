@@ -113,8 +113,8 @@ long double f(long double x)
 {
     //return  -x +1;
     //return -(x*x)+1;
-    //return cos(5*M_PI*x/2.0);
-    return cos(M_PI*x*(1-0.5));
+    return cos(5*M_PI*x/2.0);
+    //return cos(M_PI*x*(1-0.5));
 }
 
 int Write(long double* X, int N, long double* C)
@@ -151,7 +151,7 @@ int find_p()
         out<<setprecision(15)<<fixed;
         for(int i = 0; i < 5; i++)
         {
-            out<<0.00499905/0.00249988<<endl;
+            out<<" "<<endl;
         }
         out.close();
         return 0;
