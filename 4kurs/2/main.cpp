@@ -11,7 +11,7 @@
 using namespace std;
 
 // вариант 1000
-int find_p();
+int find_p(long double* X, long double* C);
 long double f(long double x); //функция
 int Generate_x(long double* X, int N); //создаем узлы сетки
 int Get_Coef(long double *C, int N); //получаем коэфициенты с_m
@@ -22,12 +22,15 @@ int Write(long double* X, int N, long double* C); //выведем в файл X
 
 //plot '1.txt' using 1:2 with linespoints, '1.txt' using 1:3 with lines
 
-int main(int argc, char* argv[])
+int main()
 {
     long double *X, *C;
     int N = -1; // число узлов
 
-    if(!(sscanf(argv[1],"%d",&N)==1))
+    C = (long double*) malloc(sizeof(long double)*(300));
+    X = (long double*) malloc(sizeof(long double)*(301));
+
+    if(!(scanf("%d",&N)==1))
     {
         //ошибка чтения
         return -1;
@@ -41,12 +44,11 @@ int main(int argc, char* argv[])
         return -1;
     }
     
-    C = (long double*) malloc(sizeof(long double)*(N));
-    X = (long double*) malloc(sizeof(long double)*(N+1));
-
     Generate_x(X, N);
     Get_Coef(C, N);
     Write(X, N, C);
+
+    find_p(X,C);
 
     free(X);
     free(C);
@@ -66,11 +68,14 @@ int Generate_x(long double* X, int N)
 
 int Get_Coef(long double *C, int N)
 {
-    C[0] = 0;
+    C[0] = f(0.);
     for(int i = 1; i < N; i++)
     {
         C[i] = dot_f_phi(N,i)*2.0;//;  /dot_phi_phi(N,i)/2.0
+        C[0]-= C[i];
     }
+
+    
     return 1;
 }
 
@@ -101,7 +106,7 @@ long double dot_phi_phi(int N, int j)
 long double fourier(long double* C, int N, long double x)
 {
     long double res = 0.0;
-    for(int i = 1; i < N; i++)
+    for(int i = 0; i < N; i++)
     {
         res += C[i] * cos(M_PI*(i-0.5)*x);
     }
@@ -113,8 +118,14 @@ long double f(long double x)
 {
     //return  -x +1;
     //return -(x*x)+1;
-    return cos(5*M_PI*x/2.0);
-    //return cos(M_PI*x*(1-0.5));
+    //return cos(5*M_PI*x/2.0);
+    return cos(M_PI*x*(1-0.5));
+
+    //if((x<=0.50001)&&(x>= 0.499998))
+    //{
+    //    return 1;
+    //}
+    //return 0;
 }
 
 int Write(long double* X, int N, long double* C)
@@ -134,7 +145,6 @@ int Write(long double* X, int N, long double* C)
             cout<<C[i]<<endl;
             out<<setw(25)<<X[i]<<setw(25)<<f(X[i])<<setw(25)<<fourier(C,N,X[i])<<setw(25)<<fabs(f(X[i]) - fourier(C,N,X[i]))<<endl;
         }
-        cout<<setw(25)<<N<<setw(25)<<log((long double)N)<<setw(25)<<log(1/max)<<endl;
         out. close();
         return max;
     }
@@ -142,17 +152,43 @@ int Write(long double* X, int N, long double* C)
     return -1;
 }
 
-int find_p()
+int find_p(long double* X, long double* C)
 {
+    int NUM[6] = {10,50,100,150,200,300};
+    long double a = 0.;
+    long double b = 0.;
+    long double c = 0.;
+    long double d = 0.;
     ofstream out;
     out.open("2.txt");
     if(out.is_open())
     {
-        out<<setprecision(15)<<fixed;
-        for(int i = 0; i < 5; i++)
+        for(int j = 0; j <6; j++)
         {
-            out<<" "<<endl;
+            Generate_x(X, NUM[j]);
+            Get_Coef(C, NUM[j]);
+            long double max = 0;
+            out<<setprecision(15)<<fixed;
+            for(int i = 0; i < NUM[j]; i++)
+            {
+                if(max < fabs(f(X[i]) - fourier(C, NUM[j], X[i])))
+                {
+                    max = fabs(f(X[i]) - fourier(C, NUM[j], X[i]));
+                }
+            }
+            if(j==1)
+            {
+                a = log((long double)NUM[j]);
+                b = log(1/max);
+            }
+            if(j==2)
+            {
+                c = log((long double)NUM[j]);
+                d = log(1/max);
+            }
+            out<<setw(25)<<NUM[j]<<setw(25)<<log((long double)NUM[j])<<setw(25)<<log(1/max)<<endl;
         }
+        cout<<"p = "<<(long double)(d - b)/(long double)(c - a)<<endl;
         out.close();
         return 0;
     }
