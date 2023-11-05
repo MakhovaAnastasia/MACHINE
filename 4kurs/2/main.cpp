@@ -63,18 +63,16 @@ int Generate_x(long double* X, int N)
     {
         X[i] = i*(1/(long double)N) ;
     }
+    X[N] = 1;
     return 1;
 }
 
 int Get_Coef(long double *C, int N)
 {
-    C[0] = f(0.);
-    for(int i = 1; i < N; i++)
+    for(int i = 0; i < N; i++)
     {
-        C[i] = dot_f_phi(N,i)*2.0;//;  /dot_phi_phi(N,i)/2.0
-        C[0]-= C[i];
+        C[i] = dot_f_phi(N,i) *2.0;//;  /dot_phi_phi(N,i)
     }
-
     
     return 1;
 }
@@ -86,9 +84,9 @@ long double dot_f_phi(int N, int j)
     res += f(0.) * cos(0.) /2.0;
     for(int i = 1; i < N; i++)
     {
-       res += f(i*h) * cos(M_PI*(j-0.5)*(i*h));
+       res += f(i*h) * cos(M_PI*(j+0.5)*(i*h));
     }
-    return res*h;
+    return res*h;//
 }
 
 long double dot_phi_phi(int N, int j)
@@ -108,7 +106,7 @@ long double fourier(long double* C, int N, long double x)
     long double res = 0.0;
     for(int i = 0; i < N; i++)
     {
-        res += C[i] * cos(M_PI*(i-0.5)*x);
+        res += C[i] * cos(M_PI*(i+0.5)*x);
     }
     return res;
 }
@@ -119,13 +117,13 @@ long double f(long double x)
     //return  -x +1;
     //return -(x*x)+1;
     //return cos(5*M_PI*x/2.0);
-    return cos(M_PI*x*(1-0.5));
+    //return cos(M_PI*x*(1+0.5));
 
-    //if((x<=0.50001)&&(x>= 0.499998))
-    //{
-    //    return 1;
-    //}
-    //return 0;
+    if((x<=0.50001)&&(x>= 0.499998))
+    {
+        return 1;
+    }
+    return 0;
 }
 
 int Write(long double* X, int N, long double* C)
@@ -136,13 +134,17 @@ int Write(long double* X, int N, long double* C)
     if(out.is_open())
     {
         out<<setprecision(15)<<fixed;
-        for(int i = 0; i < N; i++)
+        for(int i = 0; i <=N; i++)
         {
             if(max < fabs(f(X[i]) - fourier(C,N,X[i])))
             {
                 max = fabs(f(X[i]) - fourier(C,N,X[i]));
             }
-            cout<<C[i]<<endl;
+            if(i!=N)
+            {
+                cout<<"i = "<<i<<" "<<C[i]<<endl;
+            }
+            
             out<<setw(25)<<X[i]<<setw(25)<<f(X[i])<<setw(25)<<fourier(C,N,X[i])<<setw(25)<<fabs(f(X[i]) - fourier(C,N,X[i]))<<endl;
         }
         out. close();
