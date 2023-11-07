@@ -20,7 +20,7 @@ long double dot_c_phi(long double *C, int  N, int i,  int j); //скалярно
 long double fourier(long double* C, int N, long double x, long double y); //значение ряда фурье в точке x
 int Write(long double* X,long double* Y, int N, long double* C); //выведем в файл X, f(X), fourier(X), |f(X) - fourier(X)|
 
-//plot '1.txt' using 1:2 with linespoints, '1.txt' using 1:3 with lines
+//splot '1.txt' using 1:2:3 with points, '1.txt' using 1:2:4 with points
 
 int main()
 {
