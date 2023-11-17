@@ -59,11 +59,17 @@ int main()
 
 int Generate_x(long double* X, int N)
 {
+    //for(int i = 0; i < N; i++)
+    //{
+    //    X[i] = i*(1/(long double)N) ;
+    //}
+    //X[N] = 1;
+    long double a = -1.;
+    long double b = 1.;
     for(int i = 0; i < N; i++)
     {
-        X[i] = i*(1/(long double)N) ;
+        X[ N-1-i] = (a+b)/2.0 + (b-a)* cosl((2.*i+1.)* M_PI / (2.0*N) )/2.0;
     }
-    X[N] = 1;
     return 1;
 }
 
@@ -73,7 +79,6 @@ int Get_Coef(long double *C, int N)
     {
         C[i] = dot_f_phi(N,i) *2.0;//;  /dot_phi_phi(N,i)
     }
-    
     return 1;
 }
 
@@ -119,11 +124,12 @@ long double f(long double x)
     //return cos(5*M_PI*x/2.0);
     //return cos(M_PI*x*(1+0.5));
 
-    if((x<=0.50001)&&(x>= 0.499998))
-    {
-        return 1;
-    }
-    return 0;
+    return 1/(1+25*x*x);
+    //if((x<=0.001)&&(x>= -1))
+    //{
+    //    return 1;
+    //}
+    //return 0;
 }
 
 int Write(long double* X, int N, long double* C)
