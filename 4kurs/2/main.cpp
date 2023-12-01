@@ -116,14 +116,14 @@ long double f(long double x)
 {
     //return  -x +1;
     //return -(x*x)+1;
-    //return cos(5*M_PI*x/2.0);
+    return cos(5*M_PI*x/2.0);
     //return cos(M_PI*x*(1+0.5));
 
-    if((x<=0.50001)&&(x>= 0.499998))
-    {
-        return 1;
-    }
-    return 0;
+    //if((x<=0.50001)&&(x>= 0.499998))
+    //{
+    //    return 1;
+    //}
+    //return 0;
 }
 
 int Write(long double* X, int N, long double* C)
