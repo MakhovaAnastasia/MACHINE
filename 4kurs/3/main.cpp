@@ -51,7 +51,7 @@ int main()
     Get_Coef(C_1,C_2, N);
     Write(X,Y,N,C_2);
 
-    //find_p(X,Y,C_1, C_2);
+    find_p(X,Y,C_1, C_2);
 
     free(X);
     free(Y);
@@ -64,14 +64,14 @@ int main()
 long double f(long double x, long double y)
 {
     //return  (-x +1)* (-y +1);
-    //return (-(x*x)+1)*(-(y*y)+1);
+    return (-(x*x)+1)*(-(y*y)+1);
     //return cos(5*M_PI*x/2.0)* cos(5*M_PI*y/2.0);
     //return cos(M_PI*x*(1+0.5))*cos(M_PI*y*(1+0.5));
 
-    if((x<=0.5)&&(x>= 0.4) &&(y<=0.5)&&(y>= 0.4))
-    {
-        return 1;
-    }
+    //if((x<=0.5)&&(x>= 0.4) &&(y<=0.5)&&(y>= 0.4))
+    //{
+    //    return 1;
+    //}
     return 0;
 }
 
@@ -115,6 +115,7 @@ int Get_Coef(long double *C, long double *C_2, int N)
             C_2[N*i+j] = dot_c_phi(C,N,i,j)*2.0;
         }
     }
+
     return 1;
 }
 
@@ -152,29 +153,35 @@ int Write(long double* X,long double* Y, int N, long double* C)
     long double max = 0;
     if(out.is_open())
     {
+        long double h = 1/(long double)N;
+        h/=3.0;
         out<<setprecision(15)<<fixed;
         for(int i = 0; i <= N; i++)
         {
             for(int j = 0; j<= N; j++)
             {
-                if(max < fabs(f(X[i], Y[j]) - fourier(C,N,X[i],Y[j])))
+                for(int l = 0; l<= 2; l++)
                 {
-                    max = fabs(f(X[i], Y[j]) - fourier(C,N,X[i],Y[j]));
+                    if(max < fabs(f(X[i]+l*h, Y[j]+l*h) - fourier(C,N,X[i]+l*h,Y[j]+l*h)))
+                    {
+                        max = fabs(f(X[i]+l*h, Y[j]+l*h) - fourier(C,N,X[i]+l*h,Y[j]+l*h));
+                    }
+                    out<<setw(25)<<X[i]+l*h<<setw(25)<<Y[j]+l*h<<setw(25)<<f(X[i]+l*h, Y[j]+l*h)<<setw(25)<<fourier(C,N,X[i]+l*h,Y[j]+l*h)<<setw(25)<<fabs(f(X[i]+l*h,Y[j]+l*h) - fourier(C,N,X[i]+l*h,Y[j]+l*h))<<endl;
                 }
-                out<<setw(25)<<X[i]<<setw(25)<<Y[j]<<setw(25)<<f(X[i], Y[j])<<setw(25)<<fourier(C,N,X[i],Y[j])<<setw(25)<<fabs(f(X[i],Y[j]) - fourier(C,N,X[i],Y[j]))<<endl;
+
             }
         }
 
-        /*
+    /*
         for(int i = 0; i < N; i++)
-        {   
+        {
             for(int j = 0; j < N; j++)
             {
                 cout<<C[i*N+j]<<" ";
             }
             cout<<endl;
         }
-        */
+    */
         out. close();
         return max;
     }
@@ -201,14 +208,21 @@ int find_p(long double* X,long double*Y,  long double* C, long double* C_2)
             long double max = 0;
             out<<setprecision(15)<<fixed;
 
+            long double h = 1/(long double)NUM[j];
+            h/=3.0;
+
             for(int i = 0; i <= NUM[j]; i++)
             {
-                for(int k = 0; k <= NUM[j]; k++)
+                for(int k = 0; k <=NUM[j]; k++)
                 {
-                    if(max < fabs(f(X[i],Y[k]) - fourier(C_2, NUM[j], X[i],Y[k])))
+                    for(int l = 0; l<= 2; l++)
                     {
-                        max = fabs(f(X[i],Y[k]) - fourier(C_2, NUM[j], X[i],Y[k]));
+                        if(max < fabs(f(X[i]+l*h,Y[k]+l*h) - fourier(C_2, NUM[j], X[i]+l*h,Y[k]+l*h)))
+                        {
+                            max = fabs(f(X[i]+l*h,Y[k]+l*h) - fourier(C_2, NUM[j], X[i]+l*h,Y[k]+l*h));
+                        }
                     }
+
                 }
             }
 
