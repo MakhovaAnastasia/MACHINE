@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define eps 0.01
+#define eps 0.001
 
 int test1();
 int test2(int N);
@@ -25,6 +25,7 @@ double Simpson_err( double a,double b, double(*f)(double), int N);
 double Gauss_err( double a,double b, double(*f)(double), int N);
 double deriv_max( double a,double b, double(*f)(double), int k);
 double deriv(double x, double(*f)(double), int k);
+int find_p(void);
 
 double x0(double x) {return pow(x, 0);}
 double x1(double x) {return x;}
@@ -34,8 +35,10 @@ double x5(double x) {return pow(x, 5);}
 double x9(double x) {return pow(x, 9);}
 
 double costest(double x) { return cos(100*x);}
-//double exptest(double x) {return pow((double)M_E, (-1000)*x);}
+double exptest(double x) {return pow((double)M_E, (-100)*x);}
+double exptest2(double x) {return pow(M_E, x);}
 double sqrttest(double x) {return 1./(sqrt(1 - x*x));}
+
 
 
 
@@ -85,6 +88,7 @@ int main(int argc, char* argv[])
         cout<<setw(25)<<"answer:"<<setw(25)<<Integrate_Simpson_N(a, b, f, N)<<setw(25)<<Integrate_Gauss_N(a, b, f, N)<<endl;
         cout<<setw(25)<<"err:"<<setw(25)<<Simpson_err(a, b, f, N)<<setw(25)<<Gauss_err(a, b, f, N)<<endl;
         test2(N);
+        find_p();
     }
 
     return 0;
@@ -121,10 +125,10 @@ int test1()
 
  int test2(int N)
  {
-     double (*func[2])(double) = {costest,  sqrttest};//exptest,
-     double true_val[3] = {0,  M_PI}; //0.001,
-     double a[3] = {0,  -1}; //0,
-     double b[3] = {M_PI, 1};//1,
+     double (*func[3])(double) = {costest, exptest, sqrttest};//
+     double true_val[3] = {0, 0.001, M_PI}; //
+     double a[3] = {0,0, -1+eps}; //
+     double b[3] = {M_PI, 1, 1-eps};//
      ofstream out;
      out.open("2.txt");
      if(out.is_open())
@@ -228,6 +232,134 @@ double deriv(double x, double(*f)(double), int k)
     {
         return (f(x+eps) - f(x-eps))/(double)(2.*eps);
     }
+    double res = (deriv(x+eps, f, k-1) - deriv(x - eps, f, k-1))/(double)(2.*eps);
+    if(res < eps)
+    {
+        res =0;
+    }
+    return res;
+}
 
-    return (deriv(x+eps, f, k-1) - deriv(x - eps, f, k-1))/(double)(2.*eps);
+
+int find_p()
+{
+
+    int NUM[4] = {10,20,40,80};
+
+    long double a = 0.;
+    long double b = 0.;
+    long double c = 0.;
+    long double d = 0.;
+
+
+    long double a_g = 0.;
+    long double b_g = 0.;
+    long double c_g = 0.;
+    long double d_g = 0.;
+
+    int flag_s = 0;
+    int flag_g = 0;
+
+
+    //exp2
+    double true_val = (double)M_E - 1.0;
+    double aa = 0;
+    double bb = 1;
+
+
+    ofstream out;
+    out.open("3.txt");
+    if(out.is_open())
+    {
+        for(int j = 0; j < 4; j++)
+        {
+
+            double max_s = fabs(Integrate_Simpson_N(aa, bb, exptest2, NUM[j]) - true_val);
+            if(max_s <  0.00000000000001)
+            {
+                flag_s = 1;
+            }
+
+            if(flag_s ==0)
+            {
+                if(j==1)
+                {
+                    a = log((long double)NUM[j]);
+                    b = log(1/max_s);
+                }
+                if(j==2)
+                {
+                    c = log((long double)NUM[j]);
+                    d = log(1/max_s);
+                }
+            }
+
+       //out<<setw(25)<<NUM[j]<<setw(25)<<log((long double)NUM[j])<<setw(25)<<log(1/max_s)<<setw(25)<<log(1/max_g)<<endl;
+        }
+
+        if(flag_s == 0)
+        {
+
+             if(fabs(c - a) > 0.00000000000001)
+             {
+                 cout<<"pSimpson = "<<(long double)(d - b)/(long double)(c - a)<<endl;
+
+             }
+             else{ flag_s = 1;}
+
+         }
+         if(flag_s == 1){
+             cout<<"pSimpson нельзя вычислить"<<endl;
+        }
+
+        for(int j = 0; j < 4; j++)
+        {
+
+            double max_s = fabs(Integrate_Simpson_N(aa, bb, exptest2, NUM[j]) - true_val);
+            double max_g = fabs(Integrate_Gauss_N(aa, bb, exptest2, NUM[j]) - true_val);
+
+            if(max_g <  0.00000000000001)
+            {
+                flag_g = 1;
+            }
+            else{
+                flag_g = 0;
+            }
+
+            if(flag_g == 0)
+            {
+                if(j==0)
+                {
+                    a_g = log((long double)NUM[j]);
+                    b_g= log(1/max_g);
+                }
+                if(j==1)
+                {
+                    c_g = log((long double)NUM[j]);
+                    d_g = log(1/max_g);
+                }
+                out<<setw(25)<<NUM[j]<<setw(25)<<log((long double)NUM[j])<<setw(25)<<log(1/max_s)<<setw(25)<<log(1/max_g)<<endl;
+            }
+            cout<<NUM[j]<<" "<<max_s<<" "<< max_g<<endl;
+
+        }
+        if(flag_g == 1)
+        {
+            if(fabs(c_g - a_g) >  0.00000000000001)
+            {
+                cout<<"pGauss = "<<(long double)(d_g - b_g)/(long double)(c_g - a_g)<<endl;
+
+            }
+            else{ flag_g = 1;}
+
+        }
+        if(flag_g == 1){
+           // cout<<"pGauss нельзя вычислить"<<endl;
+        }
+
+        out.close();
+        return 0;
+    }
+    out. close();
+    return -1;
 }
