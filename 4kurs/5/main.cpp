@@ -19,11 +19,12 @@ int find_p(double **V,int** T,int** vR,int** gR);
 
 int main(int argc, char* argv[])
 {
-    double Lx = 0; 
-    double Ly = 0;
-    int Nx = -1;
-    int Ny = -1;
-
+    double Lx = 1;
+    double Ly = 1;
+    int Nx1 = 100;
+    int Ny1 = 100;
+    int Nx = 100;
+    int Ny = 100;
 
     if(!((argc == 5)&&
     (sscanf(argv[1],"%lf",&Lx)==1)&&
@@ -34,7 +35,6 @@ int main(int argc, char* argv[])
         //ошибка чтения
         return -1;
     }
-
     if(Lx <= 0)
     {
         cout<<"ошибка. изменено на abs(Lx)"<<endl;
@@ -57,32 +57,38 @@ int main(int argc, char* argv[])
         Nx = 1;
     }
 
+
     double **V;
     int **T, **vR, **gR;
 
-    V = (double**) malloc(sizeof(double*)*((Nx + 1)*(Ny +1))); //вершины
-    for(int i = 0; i< (Nx + 1)*(Ny +1); i++)
+    V = (double**) malloc(sizeof(double*)*((Nx1 + 1)*(Ny1 +1))); //вершины
+    for(int i = 0; i< (Nx1 + 1)*(Ny1 +1); i++)
     {
         V[i] = (double*) malloc(sizeof(double)*(2));
     }
 
-    T = (int**) malloc(sizeof(int*)*((Nx)*(Ny)*2)); //треугольники 
-    for(int i = 0; i< ((Nx)*(Ny)*2); i++)
+    T = (int**) malloc(sizeof(int*)*((Nx1)*(Ny1)*2)); //треугольники
+    for(int i = 0; i< ((Nx1)*(Ny1)*2); i++)
     {
         T[i] = (int*) malloc(sizeof(int)*(3));
     }
-     
-    vR = (int**) malloc(sizeof(int*)*((Nx*Ny*4+Ny) - ((Nx +Ny)*2))); //ребра внутренние 
-    for(int i = 0; i< (Nx*Ny*4+Ny) - ((Nx +Ny)*2); i++)
+
+    vR = (int**) malloc(sizeof(int*)*((Nx1*Ny1*4+Ny1) - ((Nx1 +Ny1)*2))); //ребра внутренние
+    for(int i = 0; i< (Nx1*Ny1*4+Ny1) - ((Nx1 +Ny1)*2); i++)
     {
         vR[i] = (int*) malloc(sizeof(int)*(2));
     }
-    
-    gR = (int**) malloc(sizeof(int*)*((Nx +Ny)*2)); //ребра граничные
-    for(int i = 0; i< (Nx +Ny)*2; i++)
+
+    gR = (int**) malloc(sizeof(int*)*((Nx1 +Ny1)*2)); //ребра граничные
+    for(int i = 0; i< (Nx1 +Ny1)*2; i++)
     {
         gR[i] = (int*) malloc(sizeof(int)*(2));
     }
+
+
+
+    find_p(V,T,vR,gR);
+
 
     /*   Триангуляция */
     Triangular(Lx, Ly, Nx, Ny,V,T,vR,gR);
@@ -91,28 +97,29 @@ int main(int argc, char* argv[])
 
     double Sn = Integrate(Nx,V, T);
     cout<<"Sn = "<<Sn<<endl;
+    cout<<"R = "<<scientific<<fabs(Sn  - (13/12.))<<endl;
 
-    find_p(V,T,vR,gR);
-    
-    for(int i = 0; i< (Nx + 1)*(Ny +1); i++)
+
+
+    for(int i = 0; i< (Nx1 + 1)*(Ny1 +1); i++)
     {
         free(V[i]);
     }
     free(V);
 
-    for(int i = 0; i< ((Nx)*(Ny)*2); i++)
+    for(int i = 0; i< ((Nx1)*(Ny1)*2); i++)
     {
         free(T[i]);
     }
     free(T);
      
-    for(int i = 0; i< (Nx*Ny*4+Ny) - ((Nx +Ny)*2); i++)
+    for(int i = 0; i< (Nx1*Ny1*4+Ny1) - ((Nx1 +Ny1)*2); i++)
     {
         free(vR[i]);
     }
     free(vR);
     
-    for(int i = 0; i< (Nx +Ny)*2; i++)
+    for(int i = 0; i< (Nx1 +Ny1)*2; i++)
     {
         free(gR[i]);
     }
@@ -156,6 +163,11 @@ int Triangular(double Lx,double Ly,int Nx,int Ny,double **V,int** T,int** vR,int
                     gR[n][1] = T[k][2];
                     n ++;
                 }
+                else{
+                    vR[m][0] = T[k][0];
+                    vR[m][1] = T[k][2];
+                    m++;
+                }
 
                 gR[n][0] = T[k][0];
                 gR[n][1] = T[k][1];
@@ -168,6 +180,11 @@ int Triangular(double Lx,double Ly,int Nx,int Ny,double **V,int** T,int** vR,int
                     gR[n][0] = T[k][0];
                     gR[n][1] = T[k][2];
                     n ++;
+                }
+                else{
+                    vR[m][0] = T[k][0];
+                    vR[m][1] = T[k][2];
+                    m++;
                 }
 
                 vR[m][0] = T[k][0];
@@ -262,7 +279,8 @@ int Triangular(double Lx,double Ly,int Nx,int Ny,double **V,int** T,int** vR,int
 
 double f(double x1, double x2)
 {
-    return (pow(x1,4) + pow(x1,2)*pow(x2,2)+ pow(x2,4));
+    //return (pow(x1,4) + pow(x1,2)*pow(x2,2)+ pow(x2,4));
+    return x1+pow(x1,2) +x1*x2;
 }
 
 double Integrate(int N, double **V,int** T)
@@ -272,12 +290,12 @@ double Integrate(int N, double **V,int** T)
     double S = (1/(double)N)*(1/(double)N)*0.5;
     for(int i = 0; i <(N*N*2);i++)
     {
-        A1 = fabs(V[T[i][0]][0] - V[T[i][1]][0])/2.;
-        A2 = fabs(V[T[i][0]][1] - V[T[i][1]][1])/2.;
-        B1 = fabs(V[T[i][1]][0] - V[T[i][2]][0])/2.;
-        B2 = fabs(V[T[i][1]][1] - V[T[i][2]][1])/2.;
-        C1 = fabs(V[T[i][2]][0] - V[T[i][0]][0])/2.;
-        C2 = fabs(V[T[i][2]][1] - V[T[i][0]][1])/2.;
+        A1 = fabs(V[T[i][0]][0] + V[T[i][1]][0])/2.;
+        A2 = fabs(V[T[i][0]][1] + V[T[i][1]][1])/2.;
+        B1 = fabs(V[T[i][1]][0] + V[T[i][2]][0])/2.;
+        B2 = fabs(V[T[i][1]][1] + V[T[i][2]][1])/2.;
+        C1 = fabs(V[T[i][2]][0] + V[T[i][0]][0])/2.;
+        C2 = fabs(V[T[i][2]][1] + V[T[i][0]][1])/2.;
         sum+=(1/3.)*S*(f(A1,A2)+f(B1,B2)+f(C1,C2));
     }
     return sum;
@@ -285,7 +303,7 @@ double Integrate(int N, double **V,int** T)
 
 int find_p(double **V,int** T,int** vR,int** gR)
 {
-    double true_val = 33/45.;
+    double true_val = 13/12.;//23/45.;
 
     int NUM[4] = {10,20,40,80};
 
@@ -333,7 +351,7 @@ int find_p(double **V,int** T,int** vR,int** gR)
 
             }
             if(flag == 1){
-            cout<<"p нельзя вычислить"<<endl;
+            cout<<"p нельзя вычислить" <<endl;
             }
         out.close();
         return 0;
