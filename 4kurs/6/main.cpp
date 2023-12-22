@@ -18,7 +18,7 @@ double dot_f_phi(int N, int j,   double p); //скалярное произве�
 double y_k(  double* C, int N, int k); //значение ряда y_k
 double Write(int N,   double* C,   double* True_val); //выведем в файл i, true_val, y, |true_val - y|
 double Err(int N,   double* C,   double p);
-double Richardson(double*X, double* X_new, double* True_value, double* A, double *F, double tau, double q, int N, double eps, int mIter);
+double Richardson(double*X, double* X_new, double* True_value, double* A, double *F, double tau, double q, int N, int mIter);
 //plot '1.txt' using 1:2 with linespoints, '1.txt' using 1:3 with lines
 
 int main(int argc, char* argv[])
@@ -27,8 +27,8 @@ int main(int argc, char* argv[])
     int N = -1; // число узлов
     double p = 0.;
     
-    int mIter = 50;
-    double eps = 0.00000000001;
+    int mIter = 100;
+    //double eps = 0.00000000001;
 
 
     if(!((argc == 3)&&
@@ -57,8 +57,8 @@ int main(int argc, char* argv[])
 
     double a = -N*N;
     double b  = (2*N*N +p);
-    double m = min(b - fabs(2*a), b - fabs(a));
-    double M = (-2)*a + b;
+    double m = p;
+    double M = (4*N*N +p);
     double tau = 2/(double)(m+M);
     double q = (M-m)/(double)(M+m);
 
@@ -74,7 +74,8 @@ int main(int argc, char* argv[])
     //True_value
     for(int i = 0; i < N+1; i++)
     {
-        if(i%2 == 0)
+        //if((i == 0)||(i==N))
+        if(i%2 ==0)
         {
             True_value[i] = 0.;
         }
@@ -102,20 +103,20 @@ int main(int argc, char* argv[])
         {
             if(i == j)
             {
-                A[N*i+j] = b;
-                cout<<A[N*i+j]<<" ";
+                A[(N+1)*i+j] = b;
+                cout<<A[(N+1)*i+j]<<" ";
                 continue;
             }
             if((j -1 == i) ||(i-1 == j))
             {
-                A[N*i+j] = a;
-                cout<<A[N*i+j]<<" ";
+                A[(N+1)*i+j] = a;
+                cout<<A[(N+1)*i+j]<<" ";
                 continue;
             }
             else{
-                A[N*i+j] = 0;
+                A[(N+1)*i+j] = 0;
             }
-            cout<<A[N*i+j]<<" ";
+           cout<<A[(N+1)*i+j]<<" ";
         }
         cout<<endl;
     }
@@ -138,7 +139,7 @@ int main(int argc, char* argv[])
     cout<<"невязка: "<<Err(N,C,p)<<endl;
 
     /* 2 */
-    cout<<"невязка (Ричардсон): "<<Richardson(X,X_new,True_value, A, F, tau, q, N, eps, mIter)<<endl;
+    cout<<"невязка (Ричардсон): "<<Richardson(X,X_new,True_value, A, F, tau, q, N, mIter)<<endl;
 
     free(True_value);
     free(C);
@@ -150,53 +151,76 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-double Richardson(double*X, double* X_new, double* True_value, double* A, double *F, double tau, double q, int N, double eps, int mIter)
+double Richardson(double*X, double* X_new, double* True_value, double* A, double *F, double tau, double q, int N, int mIter)
 {
     ofstream out;
     out.open("2.txt");
     double sum = 0;
     double norm_0 = 0;
-    double norm_k = 0;
     double nevyaz = 0;
+    double norm_k = 0;
+
     if(out.is_open())
     {
         out<<setprecision(15)<<fixed;
-        for(int k = 1; k < mIter ; k++)
+        for(int k = 1; k <= mIter ; k++)
         {
-            //x^(k+1) = (I-tA)x^k +tF
+            norm_k = 0;
+            //x^(k) = (I-tA)x^(k-1) +tF
             for(int i = 0; i < N+1; i++)
             {
+                sum = 0;
                 // I-tA * X
                 for(int j = 0; j < N+1; j++)
                 {
+                    /*
                     if(j == i)
                     {
-                        sum+=(1 - tau*A[N*i +j])*X[j];
+                        //cout<<k<<"("<<i<<' '<<j<<')'<<A[(N+1)*i +j]<<endl;
+                        sum+=(1 - tau*A[(N+1)*i +j])*X[j];
                     }
                     else{
-                        sum+=(- tau*A[N*i +j])*X[j];
+                        //cout<<k<<"("<<i<<' '<<j<<')'<<A[(N+1)*i +j]<<endl;
+                        sum+=(- tau*A[(N+1)*i +j])*X[j];
+
                     }
+                    */
+
+                    sum-=(tau*A[(N+1)*i +j])*X[j];
+
                 }
+
                 // +tF
-                X_new[i] = sum + tau*F[i];
-                sum = 0;
+                X_new[i] = X[i]+ sum + tau*F[i];
+
 
                 //norm
                 if(k==1)
                 {
-                    norm_0 += (True_value[i] - X[i])*(True_value[i] - X[i])/(double)N;
+                    //if(norm_0 < fabs(True_value[i] - X[i]))
+                    //{
+                    //    norm_0 = fabs(True_value[i] - X[i]);
+                    //}
+                   norm_0 += (True_value[i] - X[i])*(True_value[i] - X[i])/(double)N;
                 }
+                //if(norm_k < fabs(True_value[i] - X_new[i]))
+                //{
+                //    norm_k = fabs(True_value[i] - X_new[i]);
+                //}
                 norm_k += (True_value[i] - X_new[i])*(True_value[i] - X_new[i])/(double)N;
-
 
             }
             out<<setw(25)<<k<<setw(25)<<sqrt(norm_k)<<setw(25)<<pow(q,k)*sqrt(norm_0)<<endl;
+            //out<<setw(25)<<k<<setw(25)<<norm_k<<setw(25)<<pow(q,k)*norm_0<<endl;
+
             //swap
             for(int l = 0; l<N+1; l++)
             {
                 X[l] = X_new[l];
             }
+            sum = 0;
             norm_k = 0;
+
         }
 
         //nevyazka
@@ -205,13 +229,18 @@ double Richardson(double*X, double* X_new, double* True_value, double* A, double
             double res = 0;
             for(int j = 0;j < N+1; j++)
             {
-                res+= A[N*i+j]*X[j];
+                res+= A[(N+1)*i+j]*X[j];
+            }
+            if(nevyaz < fabs(F[i] - res))
+            {
+                nevyaz = fabs(F[i] - res);
             }
 
-            nevyaz += (F[i] - res)*(F[i] - res)/(double)N;
+           // nevyaz += (F[i] - res)*(F[i] - res)/(double)N;
         }
         out. close();
-        return sqrt(nevyaz);
+        //return sqrt(nevyaz);
+        return nevyaz;
     }
     out.close();
     return -1;
@@ -221,16 +250,16 @@ double Richardson(double*X, double* X_new, double* True_value, double* A, double
 
 double f(int i,   double p, int N)
 {
-    if(i == 0)
+    if((i == 0) ||(i == N))
     {
-        return (-1)*N*N;
+        return (-1)*N*N;//a
     }
-    if(i%2 == 0)
+    if((i == 1)||(i == N-1))
     {
-        return (-2)*N*N;
+        return (-1)*N*N+p;//b+a
     }
     else{
-        return (2*N*N) + p;
+        return  p;//b+a+a
     }
 }
 
@@ -305,10 +334,13 @@ double y_k(  double* C, int N, int k)
     
     for(int i = 1; i < N; i++)
     {
-        max += (a*y_k(C,N,i-1) + b*y_k(C,N,i) + a*y_k(C,N,i+1) - f(i,p,N))*(a*y_k(C,N,i-1) + b*y_k(C,N,i) + a*y_k(C,N,i+1) - f(i,p,N)) /(double)N;
+        if(max < fabs(a*y_k(C,N,i-1) + b*y_k(C,N,i) + a*y_k(C,N,i+1) - f(i,p,N)) )
+        {
+            max = fabs(a*y_k(C,N,i-1) + b*y_k(C,N,i) + a*y_k(C,N,i+1) - f(i,p,N));
+        }
     }
 
-    return sqrt(max);
+    return max;
 }
 
 
