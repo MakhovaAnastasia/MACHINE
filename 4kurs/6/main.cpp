@@ -55,21 +55,21 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    double a = -N*N;
-    double b  = (2*N*N +p);
-    double m = p;
-    double M = (4*N*N +p);
+    double a = -(N)*(N);//
+    double b  = (2*(N)*(N) +p);//
+    double m = lambda_n(1,N,p); //p;
+    double M = lambda_n(N-1,N,p);//(4*(N+1)*(N+1) +p);
     double tau = 2/(double)(m+M);
     double q = (M-m)/(double)(M+m);
 
-        //cout<<M<<endl<<m<<endl<<q<<endl<<tau<<endl;
+
+    //cout<<M<<endl<<m<<endl<<q<<endl<<tau<<endl;
 
     C = (  double*) malloc(sizeof(  double)*(N));
     True_value = (  double*) malloc(sizeof(  double)*(N+1));
     X = (  double*) malloc(sizeof(  double)*(N+1));
-    X_new = (  double*) malloc(sizeof(  double)*(N+1));
-    A = (  double*) malloc(sizeof(  double)*((N+1)*(N+1)));
-    F = (  double*) malloc(sizeof(  double)*(N+1));
+    A = (  double*) malloc(sizeof(  double)*((N-1)*(N-1)));
+    F = (  double*) malloc(sizeof(  double)*(N-1));
 
     //True_value
     for(int i = 0; i < N+1; i++)
@@ -85,40 +85,42 @@ int main(int argc, char* argv[])
     }
 
     //F,A
-    for(int i  = 0; i< N+1; i++)
+    for(int i  = 0; i< N-1; i++)
     {
-        if((i ==0) ||(i== N))
-        {
-            F[i] = a;
-        }
-        if(i%2 == 0)
-        {
-            F[i] = 2*a;
-        }
-        else{
-            F[i] = b;
-        }
+        //if((i ==0)||(i == N))
+        //{
+        //    F[i] = a;
+        //}
+       // else {
+            if(i%2 == 1)//0
+            {
+                F[i] = 2*a;
+            }
+            else{
+                F[i] = b;
+            }
+        //}
 
-        for(int j = 0; j< N+1; j++)
+        for(int j = 0; j< N-1; j++)
         {
             if(i == j)
             {
-                A[(N+1)*i+j] = b;
-                cout<<A[(N+1)*i+j]<<" ";
+                A[(N-1)*i+j] = b;
+                cout<<setw(5)<<A[(N-1)*i+j]<<" ";
                 continue;
             }
             if((j -1 == i) ||(i-1 == j))
             {
-                A[(N+1)*i+j] = a;
-                cout<<A[(N+1)*i+j]<<" ";
+                A[(N-1)*i+j] = a;
+                cout<<setw(5)<<A[(N-1)*i+j]<<" ";
                 continue;
             }
             else{
-                A[(N+1)*i+j] = 0;
+                A[(N-1)*i+j] = 0;
             }
-           cout<<A[(N+1)*i+j]<<" ";
+           cout<<setw(5)<<A[(N-1)*i+j]<<" ";
         }
-        cout<<endl;
+        cout<<"         "<<F[i]<<endl;
     }
     //X, X_new
     for(int i = 0; i< N+1; i++)
@@ -128,9 +130,8 @@ int main(int argc, char* argv[])
             X[i] = 0;
         }
         else{
-            X[i] = 1;
+            X[i] = 0;
         }
-        X_new[i] = 0;
     }
 
     /* 1 */
@@ -139,108 +140,78 @@ int main(int argc, char* argv[])
     cout<<"невязка: "<<Err(N,C,p)<<endl;
 
     /* 2 */
-    cout<<"невязка (Ричардсон): "<<Richardson(X,X_new,True_value, A, F, tau, q, N, mIter)<<endl;
+    cout<<"невязка (Ричардсон): "<<Richardson(X,True_value, A, F, tau, q, N, mIter)<<endl;
+
 
     free(True_value);
     free(C);
     free(X);
-    free(X_new);
     free(A);
     free(F);
 
     return 0;
 }
 
-double Richardson(double*X, double* X_new, double* True_value, double* A, double *F, double tau, double q, int N, int mIter)
+double Richardson(double*X, double* True_value, double* A, double *F, double tau, double q, int N, int mIter)
 {
     ofstream out;
     out.open("2.txt");
-    double sum = 0;
     double norm_0 = 0;
     double nevyaz = 0;
     double norm_k = 0;
+    double qk = q;
+    double* Mass;
+    Mass = (double*) malloc(sizeof(double)*(N));
 
     if(out.is_open())
     {
         out<<setprecision(15)<<fixed;
         for(int k = 1; k <= mIter ; k++)
         {
-            norm_k = 0;
-            //x^(k) = (I-tA)x^(k-1) +tF
-            for(int i = 0; i < N+1; i++)
+            for(int i = 0; i < N-1; i++)
             {
-                sum = 0;
                 // I-tA * X
-                for(int j = 0; j < N+1; j++)
+                Mass[i] = 0;
+                for(int j = 0; j < N-1; j++)
                 {
-                    /*
-                    if(j == i)
-                    {
-                        //cout<<k<<"("<<i<<' '<<j<<')'<<A[(N+1)*i +j]<<endl;
-                        sum+=(1 - tau*A[(N+1)*i +j])*X[j];
-                    }
-                    else{
-                        //cout<<k<<"("<<i<<' '<<j<<')'<<A[(N+1)*i +j]<<endl;
-                        sum+=(- tau*A[(N+1)*i +j])*X[j];
-
-                    }
-                    */
-
-                    sum-=(tau*A[(N+1)*i +j])*X[j];
-
+                    Mass[i]+=A[(N-1)*i +j]*X[j+1];
                 }
+            }
 
-                // +tF
-                X_new[i] = X[i]+ sum + tau*F[i];
-
-
-                //norm
+            norm_k = 0;
+            for(int i = 0; i < N-1; i++)
+            {
+                
                 if(k==1)
                 {
-                    //if(norm_0 < fabs(True_value[i] - X[i]))
-                    //{
-                    //    norm_0 = fabs(True_value[i] - X[i]);
-                    //}
-                   norm_0 += (True_value[i] - X[i])*(True_value[i] - X[i])/(double)N;
+                   norm_0 += (True_value[i+1] - X[i+1])*(True_value[i+1] - X[i+1])/(double)N;
                 }
-                //if(norm_k < fabs(True_value[i] - X_new[i]))
-                //{
-                //    norm_k = fabs(True_value[i] - X_new[i]);
-                //}
-                norm_k += (True_value[i] - X_new[i])*(True_value[i] - X_new[i])/(double)N;
+
+                //x^(k) = (I-tA)x^(k-1) +tF
+                X[i+1] = X[i+1]- tau*Mass[i] + tau*F[i];
+
+                //norm
+                norm_k += (True_value[i+1] - X[i+1])*(True_value[i+1] - X[i+1])/(double)N;
 
             }
-            out<<setw(25)<<k<<setw(25)<<sqrt(norm_k)<<setw(25)<<pow(q,k)*sqrt(norm_0)<<endl;
-            //out<<setw(25)<<k<<setw(25)<<norm_k<<setw(25)<<pow(q,k)*norm_0<<endl;
-
-            //swap
-            for(int l = 0; l<N+1; l++)
-            {
-                X[l] = X_new[l];
-            }
-            sum = 0;
-            norm_k = 0;
+            out<<setw(25)<<k<<setw(25)<<sqrt(norm_k)<<setw(25)<<qk*sqrt(norm_0)<<endl;
+            qk*=q;            
 
         }
 
-        //nevyazka
-        for(int i = 0; i < N+1;i++)
+        free(Mass);
+        //nevyazka ||F-Ax||
+        for(int i = 0; i < N-1;i++)
         {
             double res = 0;
-            for(int j = 0;j < N+1; j++)
+            for(int j = 0;j < N-1; j++)
             {
-                res+= A[(N+1)*i+j]*X[j];
+                res+= A[(N-1)*i+j]*X[j+1];
             }
-            if(nevyaz < fabs(F[i] - res))
-            {
-                nevyaz = fabs(F[i] - res);
-            }
-
-           // nevyaz += (F[i] - res)*(F[i] - res)/(double)N;
+            nevyaz += (F[i] - res)*(F[i] - res)/(double)N;
         }
         out. close();
-        //return sqrt(nevyaz);
-        return nevyaz;
+        return sqrt(nevyaz);
     }
     out.close();
     return -1;
