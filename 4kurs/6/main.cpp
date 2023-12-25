@@ -18,12 +18,12 @@ double dot_f_phi(int N, int j,   double p); //скалярное произве�
 double y_k(  double* C, int N, int k); //значение ряда y_k
 double Write(int N,   double* C,   double* True_val); //выведем в файл i, true_val, y, |true_val - y|
 double Err(int N,   double* C,   double p);
-double Richardson(double*X, double* X_new, double* True_value, double* A, double *F, double tau, double q, int N, int mIter);
+double Richardson(double*X, double* True_value, double* A, double *F, double tau, double q, int N, int mIter);
 //plot '1.txt' using 1:2 with linespoints, '1.txt' using 1:3 with lines
 
 int main(int argc, char* argv[])
 {
-    double *C, *True_value, *X, *A, *F, *X_new;
+    double *C, *True_value, *X, *A, *F;
     int N = -1; // число узлов
     double p = 0.;
     
