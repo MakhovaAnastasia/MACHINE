@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
     double q = (M-m)/(double)(M+m);
 
 
-    //cout<<M<<endl<<m<<endl<<q<<endl<<tau<<endl;
+    //cout<<q<<endl;
 
 
     True_value = (  double*) malloc(sizeof(  double)*(N+1));
@@ -72,8 +72,8 @@ int main(int argc, char* argv[])
     //True_value
     for(int i = 0; i < N+1; i++)
     {
-        //if((i == 0)||(i==N))
-        if(i%2 ==0)
+        if((i == 0)||(i==N))
+        //if(i%2 ==0)
         {
             True_value[i] = 0.;
         }
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
             X[i] = 0;
         }
         else{
-            X[i] = 0;
+            X[i] = 0.5;
         }
     }
 
@@ -123,12 +123,12 @@ int main(int argc, char* argv[])
     for(int i = 0; i < N+1; i++)
     {
         F[i] = 0;
-        for(int j = 1; j<N+1;j+=2)
+        for(int j = 1; j<N;j++)
         {
             F[i]+=A[(N+1)*i+j];
         }
 
-       // cout<<"         "<<F[i]<<endl;
+        //cout<<"         "<<F[i]<<endl;
     }
 
     /* 2 */
@@ -146,8 +146,8 @@ int main(int argc, char* argv[])
 double Richardson(double*X, double* True_value, double* A, double *F, double tau, double q, int N, int mIter)
 {
     ofstream out;
-    out.open("2.txt");
-    double norm_0 = norm_h(True_value, X, N);
+    out.open("4.txt");
+    //double norm_0 = norm_h(True_value, X, N);
     double nevyaz = 0;
     double qk = q;
     double* Mass;
@@ -166,8 +166,13 @@ double Richardson(double*X, double* True_value, double* A, double *F, double tau
                 X[i] = X[i]- tau*Mass[i] + tau*F[i];
 
             }
-            out<<setw(25)<<k<<setw(25)<<norm_h(True_value, X, N)<<setw(25)<<qk*norm_0<<endl;
-            qk*=q;            
+
+            dot(A,X,Mass,N);
+            // ||True - X||, ||F-Ax||
+            out<<setw(25)<<k<<setw(25)<<norm_h(True_value, X, N)<<setw(25)<<norm_h(F,Mass,N)<<endl;
+
+           //out<<setw(25)<<k<<setw(25)<<norm_h(True_value, X, N)<<setw(25)<<qk*norm_0<<endl;
+           qk*=q;
 
         }
 

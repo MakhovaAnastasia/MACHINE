@@ -56,11 +56,11 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    double a = -(N)*(N);//B
-    double b  = (2*(N)*(N) +p);//B
+    double a = -(N)*(N)/M_PI/M_PI;//B
+    double b  = (2*(N/M_PI)*(N/M_PI) + p);//B
     //double m = lambda_n(1,N,p); 
     //double M = lambda_n(N-1,N,p);
-    double tau = 1;//2/(double)(m+M);
+    double tau = 0.8;//2/(double)(m+M);
     //double q = (M-m)/(double)(M+m);
 
 
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
         {
             if(i == j)
             {
-                B[(N+1)*i+j] = b;
+                B[(N+1)*i+j] = b;//2*(N*N/M_PI/M_PI) + 1 +sin(M_PI*M_PI*(i)/(double) N)*sin(M_PI*M_PI*(i)/(double) N);
                 A[(N+1)*i+j] = 2*(N*N/M_PI/M_PI) + 1 +sin(M_PI*M_PI*(i)/(double) N)*sin(M_PI*M_PI*(i)/(double) N);
                 cout<<setw(5)<<A[(N+1)*i+j]<<" ";
                 continue;
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
             if((j -1 == i) ||(i-1 == j))
             {
                 B[(N+1)*i+j] = a;
-                A[(N+1)*i+j] = a/(M_PI *M_PI);
+                A[(N+1)*i+j] = a;
                 cout<<setw(5)<<A[(N+1)*i+j]<<" ";
                 continue;
             }
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
             X[i] = 0;
         }
         else{
-            X[i] = 0;
+            X[i] = 0.5;
         }
     }
 
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
     for(int i = 0; i < N+1; i++)
     {
         F[i] = 0;
-        for(int j = 1; j<N+1;j+=2)
+        for(int j = 1; j<N;j++)
         {
             F[i]+=A[(N+1)*i+j];
         }
@@ -165,9 +165,10 @@ double find_q(double* A,int N)
 double BSolver(double*X,const double*A,const  double*B,const double*F, double tau, int N, double p, int mIter, double* Y, double* Temp,double q)
 {   
     ofstream out;
-    out.open("3.txt");
+    out.open("33.txt");
     out<<setprecision(15)<<fixed;
-    double qk = q;
+    double qk = B[(N+1)*2+2];
+    qk= q;
 
     dot(A,X,Temp, N);
     double norm_0  = norm_h(F,Temp,N);
