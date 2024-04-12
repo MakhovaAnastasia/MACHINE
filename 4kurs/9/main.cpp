@@ -51,6 +51,7 @@ int main(int argc, char* argv[])
     {
         double    h = (1/(double)N);
         double max = -1.;
+        double max2 = -1.;
         cout<<setprecision(4)<<fixed;
 
         for(int i = 0; i < N; i++) //k = 1...N-1
