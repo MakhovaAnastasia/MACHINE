@@ -19,7 +19,14 @@ int main(int argc, char* argv[])
 {
     int N = -1; // число узлов
     double eps = 1e-5;
-    int res = -1;
+    int err = -1;
+    double** A;
+    double max = -1.;
+    double max2 = -1.;
+    int maxn = -1;
+    double pogr = 0.;
+    double res = 0;
+
 
     if(!((argc == 2)&&
     (sscanf(argv[1],"%d",&N)==1)))
@@ -35,10 +42,15 @@ int main(int argc, char* argv[])
         cout<<" N >= 0"<<endl;
         return -1;
     }
+    A =(double**) malloc(N* sizeof(double*));
+    for(int i = 0; i<N; i++)
+    {
+        A[i] = (double*) malloc(N*sizeof(double));
+    }
 
-    res = check_solution(N, eps);
+    err = check_solution(N, eps);
 
-    if(res  == 0)
+    if(err  == 0)
     {
         cout<<"True"<<endl;
     }
@@ -50,20 +62,20 @@ int main(int argc, char* argv[])
     if(N<= 20)
     {
         double    h = (1/(double)N);
-        double max = -1.;
-        double max2 = -1.;
+
         cout<<setprecision(4)<<fixed;
 
         for(int i = 0; i < N; i++) //k = 1...N-1
         {
             for(int j = 0; j < N; j++)
             {
-                double res = 0;
+                res = 0;
                 for(int n = 0; n < N; n++ )
                 {
                     res+=y_k_n(i,n,N)*y_k_n(j,n,N);
                 }
-                cout<<setw(15)<<scientific<<res*h;
+                A[i][j] = res*h;
+                cout<<setw(15)<<scientific<<A[i][j];
                 if(max < (res*h))
                 {
                     max = res*h;
@@ -73,6 +85,48 @@ int main(int argc, char* argv[])
         }
         cout<<"||(y,y)_h||_h  =  "<<max<<endl;
     }
+
+    //--------------------------------------------
+    //самый несобственный вектор: (A-lambdaE)y V 0
+
+    for(int n = 0; n < N; n++)
+    {
+        pogr = 0;
+        for(int i = 0; i < N; i++) //k = 1...N-1
+        {
+            res = 0;
+            for(int j = 0; j < N; j++)
+            {
+
+                if(i==j)
+                {
+                    res +=(A[i][i] - lambda_n(n, N))*A[n][j];
+                }
+                else {
+                     res +=A[i][j]*A[n][j];
+                }
+            }
+            pogr += abs(res);
+        }
+        if(pogr > max2)
+        {
+            max2 = pogr;
+            maxn = n;
+        }
+    }
+    cout<<endl<<"самый 'несобственный' вектор: "<<maxn<<endl;
+    for(int i = 0;i< N; i++)
+    {
+        cout<<A[maxn][i]<<" ";
+    }
+    cout<<endl;
+    //-----------------------------------------------
+
+    for(int i = 0; i<N; i++)
+    {
+        free(A[i]);
+    }
+    free(A);
     return 0;
 }
 
