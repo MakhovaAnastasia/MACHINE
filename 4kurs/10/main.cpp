@@ -10,14 +10,15 @@
 
 using namespace std;
 
-int no(double A, int n, double* y, int num);
-int no1(double A, int n, double* y);
-int no2(double A, int n, double* y);
-int no3(double A, int n, double* y);
+
+int no(double A, int n, double* y, int num, double EPS);
+int no1(double A, int n, double* y,double EPS);
+int no2(double A, int n, double* y, double EPS);
+int no3(double A, int n, double* y, double EPS);
 int no4(double A, int n, double* y);
-int no5(double A, int n, double* y);
+int no5(double A, int n, double* y,double EPS);
 int no6(double A, int n, double* y);
-double En(double A, int n, double* y);
+double En(double A, int n, double* y, double EPSe);
 
 //plot '2.txt' using 1:2 with linespoints, '2.txt' using 1:3 with lines
 
@@ -25,8 +26,11 @@ int main(void)
 {
     int A[3] = {1,10,1000};
     int N[4] = {1, 2, 3, 6};
+    int m[6] = {1,1,2,2,2,1};
+    double EPS = 1e-20;
+    double EPSe = -500;
     double* y;
-
+    y = (double*) malloc(sizeof(double) * 1000000);
     cout<<setw(15)<<"# "<<setw(15)<<"E1 "<<setw(15)<<"E2 "<<setw(15)<<"E3 "<<setw(15)<<"E6 "<<setw(15)<<"m "<<setw(15)<<"A "<<endl;
     for(int i = 1;i <=6; i++)
     {
@@ -36,27 +40,29 @@ int main(void)
             cout<<setw(15)<<i;
             for(int j = 0; j < 4; j++)//Ej
             {
-                double h = pow(10, -N[j]);
-                int col = (int)(1/h);
-                y = (double*) malloc(sizeof(double) * col);
-                no(A[k], N[j], y, i);
-                cout<<setw(15)<<En(A[k], N[j], y);
+                no(A[k], N[j], y, i, EPS);
+                cout<<setw(15)<<En(A[k], N[j], y, EPSe);
+
             }
-            cout<<setw(15)<<"m "<<setw(15)<<A[k]<<endl;
+            cout<<setw(15)<<m[i-1]<<setw(15)<<A[k]<<endl;
         }
     }
-    
+    free(y);
     return 0;
 }
 
-double En(double A, int n, double* y)
+double En(double A, int n, double* y, double EPSe)
 {
     double h = pow(10, -n);
     int N = (int)(1/h);
     double max = -1;
     for(int k = 0; k< N; k++)
     {
-        if(abs(y[k] - exp(-A*h*k)) > max)
+           if(-A*h*k < EPSe)
+           {
+               return -k;
+           }
+        if(fabs(y[k] - exp(-A*h*k)) > max)
         {
             max = abs(y[k] - exp(-A*h*k));
         }
@@ -64,24 +70,24 @@ double En(double A, int n, double* y)
     return max;
 }
 
-int no(double A, int n, double* y, int num)
+int no(double A, int n, double* y, int num, double EPS)
 {
     switch (num)
     {
     case 1:
-        no1(A, n, y);
+        no1(A, n, y, EPS);
         break;
     case 2:
-        no2(A, n, y);
+        no2(A, n, y, EPS);
         break;
     case 3:
-        no3(A, n, y);
+        no3(A, n, y, EPS);
         break;
     case 4:
         no4(A, n, y);
         break;
     case 5:
-        no5(A, n, y);
+        no5(A, n, y, EPS);
         break;
     case 6:
         no6(A, n, y);
@@ -92,7 +98,7 @@ int no(double A, int n, double* y, int num)
     return 1;
 }
 
-int no1(double A, int n, double* y)
+int no1(double A, int n, double* y, double EPS)
 {
     double h = pow(10, -n);
     int N = (int)(1/h);
@@ -100,11 +106,15 @@ int no1(double A, int n, double* y)
     for(int k = 1; k < N; k++)
     {
         y[k] = y[k - 1]*(1 - A*h);
+        if(fabs(y[k])< EPS)
+        {
+            y[k] = 0.;
+        }
     }
     return 1;
 }
 
-int no2(double A, int n, double* y)
+int no2(double A, int n, double* y, double EPS)
 {
     double h = pow(10, -n);
     int N = (int)(1/h);
@@ -112,11 +122,15 @@ int no2(double A, int n, double* y)
     for(int k = 1; k < N; k++)
     {
         y[k] = y[k - 1] / (1 + A*h);
+        if(fabs(y[k])< EPS)
+        {
+            y[k] = 0.;
+        }
     }
     return 1;
 }
 
-int no3(double A, int n, double* y)
+int no3(double A, int n, double* y, double EPS)
 {
     double h = pow(10, -n);
     int N = (int)(1/h);
@@ -124,6 +138,10 @@ int no3(double A, int n, double* y)
     for(int k = 1; k < N; k++)
     {
         y[k] = y[k - 1] * (2 - A * h) / (2 + A * h);
+        if(fabs(y[k])< EPS)
+        {
+            y[k] = 0.;
+        }
     }
     return 1;
 }
@@ -136,12 +154,19 @@ int no4(double A, int n, double* y)
     y[1] = 1 - A*h;
     for(int k = 2; k < N; k++)
     {
-        y[k] = y[k - 2] - 2*A*h*y[k-1];
+        if(fabs(y[k-1])> 1e+10)
+        {
+            y[k] = 1e+10;
+        }
+        else {
+            y[k] = y[k - 2] - 2*A*h*y[k-1];
+        }
+
     }
     return 1;
 }
 
-int no5(double A, int n, double* y)
+int no5(double A, int n, double* y,double EPS )
 {
     double h = pow(10, -n);
     int N = (int)(1/h);
@@ -149,6 +174,23 @@ int no5(double A, int n, double* y)
     y[1] = 1 - A*h;
     for(int k = 2; k < N; k++)
     {
+        if((y[k-1] < EPS) && (y[k-2] < EPS))
+        {
+            y[k] = 0;
+            continue;
+        }
+        else {
+            if((y[k-1] < EPS))
+            {
+                y[k] = (- 0.5*y[k - 2])/ (1.5 + A*h);
+                continue;
+            }
+            if((y[k-2] < EPS))
+            {
+                y[k] = (2*y[k - 1])/ (1.5 + A*h);
+                continue;
+            }
+        }
         y[k] = (2*y[k - 1] - 0.5*y[k - 2])/ (1.5 + A*h);
     }
     return 1;
@@ -162,7 +204,14 @@ int no6(double A, int n, double* y)
     y[1] = 1 - A*h;
     for(int k = 2; k < N; k++)
     {
-        y[k] = (2*A*h - 3)*y[k - 2] + 4*y[k - 1];
+        if((fabs(y[k-1])> 1e+10)||(fabs(y[k-2])> 1e+10))
+        {
+            y[k] = 1e+10;
+        }
+        else{
+             y[k] = (2*A*h - 3)*y[k - 2] + 4*y[k - 1];
+        }
+
     }
     return 1;
 }
