@@ -14,6 +14,7 @@ double lambda_n(int n, int N);
 double y_k_n(int k,int n, int N);
 int check_solution(int N, double eps);
 
+int Write(int N);
 
 int main(int argc, char* argv[])
 {
@@ -100,7 +101,7 @@ int main(int argc, char* argv[])
 
                 if(i==j)
                 {
-                    res +=(A[i][i] - lambda_n(n, N))*A[n][j];
+                    res +=(A[i][i] - (lambda_n(n, N)*lambda_n(n, N)))*A[n][j];
                 }
                 else {
                      res +=A[i][j]*A[n][j];
@@ -121,6 +122,7 @@ int main(int argc, char* argv[])
     }
     cout<<endl;
     //-----------------------------------------------
+    Write(N);
 
     for(int i = 0; i<N; i++)
     {
@@ -130,6 +132,23 @@ int main(int argc, char* argv[])
     return 0;
 }
 
+int Write(int N)
+{
+    ofstream out;
+    out.open("1.txt");
+    if(out.is_open())
+    {
+        out<<setprecision(15)<<fixed;
+        for(int i = 0; i <=N; i++)
+        {
+            out<<i<<" "<<y_k_n(i,2,N)<<endl;
+        }
+        out. close();
+        return 1;
+    }
+    out.close();
+    return -1;
+}
 
 double lambda_n(int n, int N)
 {
