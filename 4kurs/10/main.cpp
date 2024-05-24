@@ -20,7 +20,7 @@ int no5(double A, int n, double* y,double EPS);
 int no6(double A, int n, double* y);
 double En(double A, int n, double* y, double EPSe);
 
-//plot '2.txt' using 1:2 with linespoints, '2.txt' using 1:3 with lines
+int Write(double* y);
 
 int main(void)
 {
@@ -28,7 +28,7 @@ int main(void)
     int N[4] = {1, 2, 3, 6};
     int m[6] = {1,1,2,2,2,1};
     double EPS = 1e-20;
-    double EPSe = -500;
+    double EPSe = -700;
     double* y;
     y = (double*) malloc(sizeof(double) * 1000000);
     cout<<setw(15)<<"# "<<setw(15)<<"E1 "<<setw(15)<<"E2 "<<setw(15)<<"E3 "<<setw(15)<<"E6 "<<setw(15)<<"m "<<setw(15)<<"A "<<endl;
@@ -47,6 +47,7 @@ int main(void)
             cout<<setw(15)<<m[i-1]<<setw(15)<<A[k]<<endl;
         }
     }
+    Write(y);
     free(y);
     return 0;
 }
@@ -68,6 +69,25 @@ double En(double A, int n, double* y, double EPSe)
         }
     }
     return max;
+}
+
+int Write(double* y)
+{
+    ofstream out;
+    out.open("1.txt");
+    if(out.is_open())
+    {
+        out<<setprecision(15)<<fixed;
+        no4(10, 4, y);
+        for(int i = 0; i <pow(10, 4); i++)
+        {
+            out<<i<<" "<<y[i]<<endl;
+        }
+        out. close();
+        return 1;
+    }
+    out.close();
+    return -1;
 }
 
 int no(double A, int n, double* y, int num, double EPS)
