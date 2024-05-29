@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     double *y, *x, *k1, *k2, *k3, *k4, *res;
     double h = -0.1;//timestep
     int N = 0;//num of timesteps
-    int M = 2;//num of equations
+    int M = 1;//num of equations
     if(!((argc == 2)&&
     (sscanf(argv[1],"%lf",&h)==1)))
     {
@@ -106,35 +106,35 @@ int main(int argc, char* argv[])
 
 int f(double x, double* y, double* z, int M)
 {
-    if(M!= 2)
+    if(M!= 1)
     {return -1;}
     //z[0] = -2*x;
     y[0] = y[0];//просто, чтобы использовать y, если он не нужен
     x = x;
 
-    //z[0] = y[0]; //exp
-    z[0] = 5*x*x*x*x +1;
-    z[1] = 4*x*x*x + 2*x -1;
+    z[0] = y[0]; //exp
+    //z[0] = 5*x*x*x*x +1;
+    //z[1] = 4*x*x*x + 2*x -1;
     return 1;
 }
 
 int ans(double x,double* z, int M)
 {
-    if(M!= 2)
+    if(M!= 1)
     {return -1;}
     //z[0] = -x*x + 1;
-    //z[0] = exp(x);
-    z[0] = x*x*x*x*x + x;
-    z[1] = x*x*x*x + x*x - x;
+    z[0] = exp(x);
+    //z[0] = x*x*x*x*x + x;
+    //z[1] = x*x*x*x + x*x - x;
     return 1;
 }
 
 int NU(double*z, int M)
 {
-    if(M!= 2)
+    if(M!= 1)
     {return -1;}
-    z[0] = 0;
-    z[1] = 0;
+    z[0] = 1;
+    //z[1] = 0;
     return 1;
 }
 void K_1(double x, double* y, double* k1, double h, double M)
