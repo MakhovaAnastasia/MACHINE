@@ -139,7 +139,7 @@ void K_1(double x, double* y, double* k1, double h, double M)
     f(x, y,k1, M);
     for(int i = 0; i<M; i++)
     {
-        k1[i] = h*k1[i];
+        k1[i] *= h;
     }
     return;
 }
@@ -189,7 +189,7 @@ void y_n(double*y, double* k1, double* k2, double* k3, double* k4, int M)
 {
     for(int i = 0; i< M; i++)
     {
-        y[i] = y[i]+(k1[i] + 2*k2[i] + 2*k3[i] + k4[i])/6.;
+        y[i] = y[i] + (k1[i] + 2*k2[i] + 2*k3[i] + k4[i])/6.;
     }
     return;
 }
