@@ -21,13 +21,11 @@ double func(double x);
 double ans(double x);
 double b(double x);
 int Write(int N, double* y);
-void Progonka(int N, double* p, double* q, double* d, double* y, double*x, double*f);
+void Progonka(int N, double* alpha, double* beta, double* c, double* y, double*f);
 void fourier(double* C, int N, double*y, double*x, double*f);
 void Get_Coef(  double *C, int N, double*f, double*x);
 double lambda_n(int n, int N);
 double dot_f_phi(int N, int j, double*f, double*x);
-
-//splot '1.txt' using 1:2:3 with points, '1.txt' using 1:2:4 with points
 
 int main(int argc, char* argv[])
 {
@@ -65,7 +63,7 @@ int main(int argc, char* argv[])
     if(constant == 1)
     {
         Generate_d(d, x, N);
-        Progonka(N, p, q, d, y, x,f);
+        Progonka(N, p, q, d, y, f);
         cout<<"Прогонка"<<endl;
     }
     if(constant == 0)
@@ -96,7 +94,7 @@ int Write(int N, double* y)
         out<<setprecision(15)<<fixed;
         for(int i = 0; i <=N; i++)
         {
-            out<<setw(5)<<i<<setw(25)<<y[i]<<setw(25)<<ans(i/(double)N)<<setw(25)<<abs(y[i] - ans(i/(double)N))<<endl;
+            out<<setw(5)<<i/(double)N<<setw(25)<<y[i]<<setw(25)<<ans(i/(double)N)<<setw(25)<<abs(y[i] - ans(i/(double)N))<<endl;
         }
         out. close();
         return 1;
@@ -107,10 +105,13 @@ int Write(int N, double* y)
 
 void Generate_d(double* d, double* x, int N)
 {
-    for(int k = 0; k<=N; k++)
+    for(int k = 1; k<N; k++)
     {
-        d[k] = 2*(N*N) + b(x[k]);
+        d[k] = 2.*(N*N) + b(x[k]);
+        //cout<<d[k]<< " "<<x[k]<<endl;
     }
+    d[0] = 1*N;
+    d[N] = 1;
     return;
 }
 
@@ -120,52 +121,59 @@ void Generate_f(double* f, double* x, int N)
     {
         f[k] = func(x[k]);
     }
-
     return;
 }
 
-void Progonka(int N, double* p, double* q, double* d, double* y, double*x, double*f)
+void Progonka(int N, double* alpha, double* beta, double* c, double* y, double*f)
 {
-    double e = (N*N);
-    double c = (N*N);
+    double a =(double) (N*N);
+    double b = (double)(N*N);
+    double b0 = N;
+    double aN = 0.;
+    f[0] = 0;
+    f[N] = 0;
+    alpha[0] = 0;
+    beta[0] = 0;
 
-    p[0] = 0;
-    q[0] = 0;
+    alpha[1] =(b0/(double)c[0]);
+    beta[1] = (f[0]/(double)c[0]);
 
-    p[1] =(e/d[0]);
-    q[1] = (f[0]/d[0]);
-
-    for(int k  = 1; k < N; k++)
+    for(int i  = 1; i < N; i++)
     {
-        p[k+1] = e/(d[k] - c*p[k]);
-        q[k+1] = (f[k] + c*q[k])/(d[k] - c* p[k]);
+        alpha[i+1] = b/(double)(c[i] - a*alpha[i]);
+        beta[i+1] = (f[i] + a*beta[i])/(double)(c[i] - a* alpha[i]);
+        //cout<<alpha[i]<<" "<<beta[i]<<" "<<i<<endl;
     }
 
     //обратно
 
-    y[N] = (f[N] + c* q[N])/(d[N] - c* p[N]);
-    for(int k = N - 1; k >= 0;k--)
+    y[N] = (f[N] + aN* beta[N])/(double)(c[N] - aN* alpha[N]);
+    //cout<<y[N]<<" "<<endl;
+    for(int i = N - 1; i > -1;i--)
     {
-        y[k] = p[k+1]*y[k+1] + q[k+1];
+        y[i] = alpha[i+1]*y[i+1] + beta[i+1];
+        //cout<<y[i]<<" "<<endl;
     }
     return;
 }
 
 double func(double x)
 {
-    return 2 + b(x)*(-x*x +1);
-    //return cos(5*M_PI*x*0.5) *(25*M_PI*M_PI*0.25  + b(x));
+    //return 2 + b(x)*(-x*x +1);
+    return cos(5*M_PI*x*0.5) *(25*M_PI*M_PI*0.25  + b(x));
 }
 
 double b(double x)
 {
-    //return 1;
-    return x;
+
+    x = x;
+    //return x;
+    return 1;
 }
 double ans(double x)
 {
-    return -x*x +1;
-    //return cos(5*M_PI*x*0.5); 
+    //return -x*x +1;
+    return cos(5*M_PI*x*0.5);
 }
 
 void Generate_x(double* MATRIX, int N)
