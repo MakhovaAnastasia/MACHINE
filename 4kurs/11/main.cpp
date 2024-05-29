@@ -10,113 +10,232 @@
 
 using namespace std;
 
-// вариант 1000
 //plot '1.txt' using 1:2 with linespoints, '1.txt' using 1:3 with linespoints
 
 
-void Generate_d(double* d, double* x, int N);
-void Generate_x(double* MATRIX, int N);
-void Generate_f(double* f, double* x, int N);
-double func(double x);
-double ans(double x);
-double b(double x);
-int Write(int N, double* y);
-void Progonka(int N, double* p, double* q, double* d, double* y, double*x, double*f);
-void fourier(double* C, int N, double*y, double*x, double*f);
-void Get_Coef(  double *C, int N, double*f, double*x);
-double lambda_n(int n, int N);
-double dot_f_phi(int N, int j, double*f, double*x);
+int f(double x, double* y, double* z, int M);
+int ans(double x,double* z, int M);
+int NU(double*z, int M);
+void K_1(double x, double* y, double* k1, double h, double M);
+void K_2(double x, double* y,  double* k1,double* k2, double h, double M);
+void K_3(double x, double* y, double* k2, double* k3, double h, double M);
+void K_4(double x, double* y, double* k3, double* k4, double h, double M);
+void y_n(double*y, double* k1, double* k2, double* k3, double* k4, int M);
+void E(double*z, double* k1, double* k2, double* k3, double* k4, int M);
+void Generate_x(double* MATRIX, double h, int N);
+double normVV(double*A, double*B, int M);
+double normV(double*A,  int M);
 
-//splot '1.txt' using 1:2:3 with points, '1.txt' using 1:2:4 with points
+
 
 int main(int argc, char* argv[])
 {
-    double *y,*x, *k1, *k2, *k3, *k4;
-    int N = -1; // число узлов
-    int constant = -1;// 1 --- прогонка, 0--- Фурье
-
+    double *y, *x, *k1, *k2, *k3, *k4, *res;
+    double h = -0.1;//timestep
+    int N = 0;//num of timesteps
+    int M = 1;//num of equations
     if(!((argc == 2)&&
-    (sscanf(argv[1],"%d",&N)==1)))
+    (sscanf(argv[1],"%lf",&h)==1)))
     {
         //ошибка чтения
         return -1;
     }
 
-    if(N<=0)
+    if(h<=0)
     {
         //ошибка 
-        cout<<N<<endl;
-        cout<<" N >= 0"<<endl;
+        cout<<h<<endl;
+        cout<<" h >= 0"<<endl;
         return -1;
     }
-    
+    N = (int)((1.)/h);
+
     y = (double*) malloc(sizeof(double)*(N+1));
     x = (double*) malloc(sizeof(double)*(N+1));
     k1 = (double*) malloc(sizeof(double)*(N+1));
     k2 = (double*) malloc(sizeof(double)*(N+1));
     k3 = (double*) malloc(sizeof(double)*(N+1));
     k4 = (double*) malloc(sizeof(double)*(N+1));
-    Generate_x(x, N);
-    Generate_f(f, x, N);
+    res = (double*) malloc(sizeof(double)*(N+1));
 
-    if(constant == 1)
-    {
-        Generate_d(d, x, N);
-        Progonka(N, p, q, d, y, x,f);
-        cout<<"Прогонка"<<endl;
-    }
-    if(constant == 0)
-    {
-        fourier(C,N,y,x,f);
-        cout<<"Фурье"<<endl;
-    }
+    Generate_x(x, h, N);
 
-    Write(N,y);
-    
+    NU(y,M);
 
-    free(x);
-    free(y);
-    free(k1);
-    free(q);
-    free(d);
-    free(f);
-    free(C);
-    return 0;
-}
-
-int Write(int N, double* y)
-{
     ofstream out;
     out.open("1.txt");
     if(out.is_open())
     {
         out<<setprecision(15)<<fixed;
-        for(int i = 0; i <=N; i++)
+        for(int i = 1; i <=N; i++)
         {
-            out<<setw(5)<<x[i]<<setw(25)<<y[i]<<setw(25)<<ans(i/(double)N)<<setw(25)<<abs(y[i] - ans(i/(double)N))<<endl;
+            K_1(x[i],y,k1,h,M);
+            K_2(x[i],y,k1,k2,h,N);
+            K_3(x[i],y,k2,k3,h,M);
+            K_4(x[i],y,k3,k4,h,M);
+
+            y_n(y,k1,k2,k3,k4,M);
+            ans(x[i], res, M);
+
+            out<<setw(5)<<x[i];
+            for(int j = 0; j<M; j++)
+            {
+                out<<setw(25)<<y[j];
+            }   
+            for(int j = 0; j<M; j++)
+            {
+                out<<setw(25)<<res[j];
+            }     
+            out<<setw(25)<<normVV(y, res,M);
+            E(res,k1,k2,k3,k4,M);
+            out<<setw(25)<<normV(res,M)<<endl;
         }
-        out. close();
-        return 1;
     }
     out.close();
-    return -1;
+
+    free(x);
+    free(y);
+    free(k1);
+    free(k2);
+    free(k3);
+    free(k4);
+    free(res);
+    return 0;
 }
 
-double f(double x, double y)
+
+int f(double x, double* y, double* z, int M)
 {
+    if(M!= 1)
+    {return -1;}
+    z[0] = -2*x;
+    //z[0] = y[0]; //exp
+    //z[0] = 5*x*x*x*x +1;
+    //z[1] = 4*x*x*x + 2*x -1;
     return 1;
 }
 
-void K1(int N,double*x, double* y, double* k1)
+int ans(double x,double* z, int M)
 {
-    for(int i = 0; i < N; i++)
+    if(M!= 1)
+    {return -1;}
+    z[0] = -x*x + 1;
+    //z[0] = exp(x);
+    //z[0] = x*x*x*x*x + x;
+    //z[1] = x*x*x*x + x*x - x;
+    return 1;
+}
+
+int NU(double*z, int M)
+{
+    if(M!= 1)
+    {return -1;}
+    z[0] = 1;
+    //z[1] = 0;
+    return 1;
+}
+void K_1(double x, double* y, double* k1, double h, double M)
+{
+    f(x, y,k1, M);
+    for(int i = 0; i<M; i++)
     {
-        k1[i] = f(x[i], y[i]);
+        k1[i] = h*k1[i];
+    }
+    return;
+}
+void K_2(double x, double* y,  double* k1,double* k2, double h, double M)
+{
+    for(int i = 0; i<M; i++)
+    {
+        k2[i] = y[i]+0.5*k1[i];
+    }
+    f(x+0.5*h, k2, k2, M);
+    for(int i = 0; i<M; i++)
+    {
+        k2[i] *= h;
     }
     return;
 }
 
+void K_3(double x, double* y, double* k2, double* k3, double h, double M)
+{
+    for(int i = 0; i<M; i++)
+    {
+        k3[i] = y[i]+0.5*k2[i];
+    }
+    f(x+0.5*h, k3, k3, M);
+    for(int i = 0; i<M; i++)
+    {
+        k3[i] *= h;
+    }
+    return;
+}
 
+void K_4(double x, double* y, double* k3, double* k4, double h, double M)
+{
+    for(int i = 0; i<M; i++)
+    {
+        k4[i] = y[i]+k3[i];
+    }
+    f(x+h, k4, k4, M);
+    for(int i = 0; i<M; i++)
+    {
+        k4[i] *= h;
+    }
+    return;
+}
+
+void y_n(double*y, double* k1, double* k2, double* k3, double* k4, int M)
+{
+    for(int i = 0; i< M; i++)
+    {
+        y[i] = y[i]+(k1[i] + 2*k2[i] + 2*k3[i] + k4[i])/6.;
+    }
+    return;
+}
+
+void E(double*z, double* k1, double* k2, double* k3, double* k4, int M)
+{
+    for(int i = 0; i< M; i++)
+    {
+        z[i] = 2.*(k1[i] - k2[i] - k3[i] + k4[i])/3.;
+    }
+    return;
+}
+
+void Generate_x(double* MATRIX, double h, int N)
+{
+    for(int i = 0; i <= N; i++)
+    {
+        MATRIX[i] = i*h ;
+    }
+    return;
+}
+
+double normVV(double*A, double*B, int M)
+{
+    double max = -1;
+    for(int i = 0; i < M; i++)
+    {
+        if(abs(A[i] - B[i]) > max)
+        {
+            max = abs(A[i] - B[i]);
+        }
+    }
+    return max;
+}
+double normV(double*A,  int M)
+{
+    double max = -1;
+    for(int i = 0; i<M; i++)
+    {
+        if(abs(A[i] ) > max)
+        {
+            max = abs(A[i]);
+        }
+    }
+    return max;
+}
 
 
 
