@@ -110,7 +110,7 @@ void Generate_d(double* d, double* x, int N)
         d[k] = 2.*(N*N) + b(x[k]);
         //cout<<d[k]<< " "<<x[k]<<endl;
     }
-    d[0] = 1*N;
+    d[0] = N + (1./(double)(2*N))*b(x[0]);//1*N
     d[N] = 1;
     return;
 }
@@ -130,7 +130,7 @@ void Progonka(int N, double* alpha, double* beta, double* c, double* y, double*f
     double b = (double)(N*N);
     double b0 = N;
     double aN = 0.;
-    f[0] = 0;
+    f[0] = f[0]*0.5/(double)N;//0
     f[N] = 0;
     alpha[0] = 0;
     beta[0] = 0;
@@ -167,8 +167,8 @@ double b(double x)
 {
 
     x = x;
-    //return x;
-    return 1;
+    return x;
+    //return 1;
 }
 double ans(double x)
 {
