@@ -10,21 +10,17 @@
 
 using namespace std;
 
-//plot '1.txt' using 1:2 with linespoints, '1.txt' using 1:3 with linespoints
+//splot '1.txt' using 1:2:3 with points, '1.txt' using 1:2:4 with points
+//splot '2.txt' using 1:2:3 with points, '2.txt' using 1:2:4 with points
 
-
-int f(double x, double* y, double* z, int M);
-int ans(double x,double* z, int M);
-int NU(double*z, int M);
-void K_1(double x, double* y, double* k1, double h, double M);
-void K_2(double x, double* y,  double* k1,double* k2, double h, double M, double*tmp);
-void K_3(double x, double* y, double* k2, double* k3, double h, double M, double*tmp);
-void K_4(double x, double* y, double* k3, double* k4, double h, double M, double*tmp);
-void y_n(double*y, double* k1, double* k2, double* k3, double* k4, int M);
-void E(double*z, double* k1, double* k2, double* k3, double* k4, int M);
-void Generate_x(double* MATRIX, double h, int N);
-double normVV(double*A, double*B, int M);
-double normV(double*A,  int M);
+double u_0(double x);
+void Yavno(double** y, double h, int N, double t);
+double b(double x);
+double f(double x, double y);
+double ans(double x,double y);
+void Generate_d(double* d, int N, double t, double h);
+void Generate_f(double* F, double** y, int N, int n, double h, double t);
+void Progonka(int N, double* alpha, double* beta, double* c, double** y, double*f, double h, double t);
 
 
 
@@ -50,7 +46,7 @@ int main(int argc, char* argv[])
         return -1;
     }
     h = ((1)/(double)N);
-    t = h = ((1)/(double)N);
+    t = ((1)/(double)N);
 
     y = (double**) malloc(sizeof(double*)*(N+1));
     for(int i = 0; i<= N; i++)
@@ -69,11 +65,12 @@ int main(int argc, char* argv[])
     if(out.is_open())
     {
         out<<setprecision(15)<<fixed;
-        for(int m = 0; m <=N; m++)
+        for(int n = 0; n<=N; n++)
         {
-            for(int n = 0; n<=N; n++)
+            for(int m = 0; m<=N; m++)
             {
-                out<<setw(25)<< y[n][m];
+                //out<<setw(25)<<m*h<<setw(25)<<y[1][m]<<setw(25)<<ans(1*t,m*h)<<endl;
+                out<<setw(25)<<m*h<<setw(25)<<n*t<<setw(35)<<y[n][m]<<setw(35)<<ans(n*t,m*h)<<endl;
             }
             out<<endl;
         }
@@ -86,11 +83,11 @@ int main(int argc, char* argv[])
     if(out2.is_open())
     {
         out2<<setprecision(15)<<fixed;
-        for(int m = 0; m <=N; m++)
+        for(int n = 0; n<=N; n++)
         {
-            for(int n = 0; n<=N; n++)
+            for(int m = 0; m<=N; m++)
             {
-                out2<<setw(25)<< y[n][m];
+                out2<<setw(25)<<m*h<<setw(25)<<n*t<<setw(35)<<y[n][m]<<setw(35)<<ans(n*t,m*h)<<endl;
             }
             out2<<endl;
         }
@@ -112,11 +109,6 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-double u_0(double x)
-{
-    return 1-x;
-}
-
 void Yavno(double** y, double h, int N, double t)
 {
     //n==0
@@ -128,10 +120,10 @@ void Yavno(double** y, double h, int N, double t)
     for(int  n = 0; n<N; n++)
     {
         //left
-        y[n+1][0] = y[n][0] - t*(f(n*t,0.) - b(0.)*y[n][0] - (2./(double)(h*h))*(y[n][1] - y[n][0]));
+        y[n+1][0] = t*h*0.5*f(n*t,0.) + y[n][0] *(-b(0.)*t*h*0.5 +1 - t/(h)) + y[n][1]*t/(h);
 
         //right
-        y[n][N] = 0;
+        y[n+1][N] = 0;
 
         //other
         for(int m = 1; m < N; m++)
@@ -142,41 +134,47 @@ void Yavno(double** y, double h, int N, double t)
     }
 }
 
+double u_0(double x)
+{
+    double k = 1;
+    return cos(M_PI*(k+0.5)*x);
+}
+
 double b(double x)
 {
-    return x;
+    return 2*x;
 }
 
 double f(double x, double y)
 {
-
-    return 1;
+    return b(y)*ans(x,y);
 }
 
-int ans(double x,double* z, int M)
+double ans(double x,double y)
 {
-   
-    return 1;
+    double k = 1;
+    return cos(M_PI*(k+0.5)*y)*exp(-M_PI*M_PI*(k+0.5)*(k+0.5)*x);
 }
 
 void Generate_d(double* d, int N, double t, double h)
 {
     for(int k = 1; k<N; k++)
     {
-        d[k] = 1 - 2.*(N*N)*t;
+        d[k] = t*b(k*h) + 2.*(double)(N*N)*t + 1;
+        //cout<<d[k]<<" "<<k<<endl;
     }
-    d[0] = -N + 0.5*h*b(0) + 1/t;
+    d[0] = -(double)N + 0.5*h*b(0.) + 0.5*h/t;
     d[N] = 1;
     return;
 }
 
 void Generate_f(double* F, double** y, int N, int n, double h, double t)
 {
-    for(int m = 0; m<=N; m++)
+    for(int m = 0; m<N; m++)
     {
-        F[m] = t*f(n*t, m*h) + y[n][m]*(1 - b(m*h)*t);
+        F[m] = t*f((n+1)*t, m*h) + y[n][m];
     }
-    F[0] = (F[0] + y[n][0]/t)*0.5*h;
+    F[0] = -(f((n+1)*t,0.) + y[n][0]/t)*0.5*h;
     F[N] = 0;
     return;
 }
@@ -191,71 +189,40 @@ void Progonka(int N, double* alpha, double* beta, double* c, double** y, double*
     alpha[0] = 0;
     beta[0] = 0;
 
+    //nu
     for(int m = 0; m<= N; m++)
     {
         y[0][m] = u_0(m*h);
     }
+
+    Generate_d(c,N, t, h);
     for(int n = 0; n<N; n++)
     {
-        Generate_d(c,N, t, h);
+       
         Generate_f(f,y,N,n,h, t);
         alpha[1] =(b0/(double)c[0]);
         beta[1] = (f[0]/(double)c[0]);
-
+        
         for(int i  = 1; i < N; i++)
         {
             alpha[i+1] = b/(double)(c[i] - a*alpha[i]);
             beta[i+1] = (f[i] + a*beta[i])/(double)(c[i] - a* alpha[i]);
-        //cout<<alpha[i]<<" "<<beta[i]<<" "<<i<<endl;
         }
 
         //обратно
 
         y[n+1][N] = (f[N] + aN* beta[N])/(double)(c[N] - aN* alpha[N]);
-        //cout<<y[N]<<" "<<endl;
+    
         for(int i = N - 1; i > -1;i--)
         {
             y[n+1][i] = alpha[i+1]*y[n+1][i+1] + beta[i+1];
-            //cout<<y[i]<<" "<<endl;
+        
         }
     }
     return;
 }
 
 
-void Generate_x(double* MATRIX, double h, int N)
-{
-    for(int i = 0; i <= N; i++)
-    {
-        MATRIX[i] = i*h ;
-    }
-    return;
-}
-
-double normVV(double*A, double*B, int M)
-{
-    double max = -1;
-    for(int i = 0; i < M; i++)
-    {
-        if(abs(A[i] - B[i]) > max)
-        {
-            max = abs(A[i] - B[i]);
-        }
-    }
-    return max;
-}
-double normV(double*A,  int M)
-{
-    double max = -1;
-    for(int i = 0; i<M; i++)
-    {
-        if(abs(A[i] ) > max)
-        {
-            max = abs(A[i]);
-        }
-    }
-    return max;
-}
 
 
 
