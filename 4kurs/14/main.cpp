@@ -18,7 +18,7 @@ int Generate_x(long double* MATRIX, int N); //создаем узлы сетки
 int Get_Coef(long double *C, long double *C_2, int N, long double t); //получаем коэфициенты с_m
 long double dot_f_phi(int N, int i,  int j, long double t); //скалярное произведение f и phi_m
 long double dot_c_phi(long double *C, int  N, int i,  int j); //скалярное произведение C_1 и phi_m
-long double fourier(long double* C, int N, long double x, long double y, long double t); //значение ряда фурье в точке x
+long double fourier(long double* C, int N, long double x, long double y); //значение ряда фурье в точке x
 int Write(long double* X,long double* Y, int N, long double* C,long double* C_2, int T); //выведем в файл X, f(X), fourier(X), |f(X) - fourier(X)|
 
 //splot '1.txt' using 1:2:3 with points, '1.txt' using 1:2:4 with points
@@ -30,8 +30,8 @@ set output "animate.gif"
 FILE(i) = sprintf("%d.txt",i)
 set xrange [0:1]
 set yrange [0:1]
-set zrange [-1:1]
-do for [i = 0:9]{
+set zrange [-100:100]
+do for [i = 0:99]{
     splot FILE(i) using 1:2:3 with points, FILE(i) using 1:2:4 with points
 }
 */
@@ -84,7 +84,7 @@ long double f(long double t,long double x, long double y)
 long double ans(long double t,long double x, long double y)
 {
     
-    return cos(5*M_PI*x/2.0)* cos(5*M_PI*y/2.0)*exp(-M_PI*M_PI*(2.5)*(2.5)*t*0.001);
+    return cos(5*M_PI*x/2.0)* cos(5*M_PI*y/2.0)*exp(-M_PI*M_PI*(2.5)*(2.5)*t); //*0.001
     //return cos(M_PI*x*(0.5))*cos(M_PI*0.5*y)*exp(-M_PI*M_PI*0.25*t);
 }
 
@@ -98,7 +98,7 @@ int Generate_x(long double* MATRIX, int N)
     return 1;
 }
 
-long double fourier(long double* C, int N, long double x, long double y, long double t)
+long double fourier(long double* C, int N, long double x, long double y)
 {
     long double res = 0.0;
     for(int i = 0; i < N; i++)
@@ -161,11 +161,14 @@ long double dot_c_phi(long double *C, int  N, int i,  int j)
 
 int Write(long double* X,long double* Y, int N, long double* C,long double* C_2, int T)
 {
-    for(int k = 0; k<T; k++)
+    double k = 0;
+    double max = -1;
+    for(int p = 0; p< T; p++)
     {
+        k+=(double)p/(double)T;
         Get_Coef(C,C_2,N,k);
         ofstream out;
-        out.open(to_string(k)+".txt");
+        out.open(to_string(p)+".txt");
         if(out.is_open())
         {
             long double h = 1/(long double)N;
@@ -181,13 +184,20 @@ int Write(long double* X,long double* Y, int N, long double* C,long double* C_2,
                         //{
                         //    max = fabs(f(k,X[i]+l*h, Y[j]+l*h) - fourier(C,N,X[i]+l*h,Y[j]+l*h));
                         //}
-                        out<<setw(25)<<X[i]+l*h<<setw(25)<<Y[j]+l*h<<setw(25)<<f(k,X[i]+l*h, Y[j]+l*h)<<setw(25)<<fourier(C_2,N,X[i]+l*h,Y[j]+l*h,k)<<setw(25)<<fabs(f(k,X[i]+l*h,Y[j]+l*h) - fourier(C_2,N,X[i]+l*h,Y[j]+l*h, k))<<endl;
+
+                        out<<setw(25)<<X[i]+l*h<<setw(25)<<Y[j]+l*h<<setw(25)<<f(k,X[i]+l*h, Y[j]+l*h)<<setw(25)<<fourier(C_2,N,X[i]+l*h,Y[j]+l*h)<<setw(25)<<fabs(f(k,X[i]+l*h,Y[j]+l*h) - fourier(C_2,N,X[i]+l*h,Y[j]+l*h))<<endl;
+
+                        if(fabs(f(k,X[i]+l*h, Y[j]+l*h) - fourier(C_2,N,X[i]+l*h,Y[j]+l*h)) > max)
+                        {
+                            max = fabs(f(k,X[i]+l*h, Y[j]+l*h) - fourier(C_2,N,X[i]+l*h,Y[j]+l*h));
+                        }
                     }
 
                }
             }
             out.close();
         }
+
     /*
         for(int i = 0; i < N; i++)
         {
@@ -200,6 +210,7 @@ int Write(long double* X,long double* Y, int N, long double* C,long double* C_2,
     */
         
     }
+     cout<<"max = "<<max<<endl;
     return 0;
 }
 
