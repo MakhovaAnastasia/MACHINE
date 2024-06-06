@@ -15,12 +15,12 @@ using namespace std;
 long double f(long double t,long double x, long double y); //функция
 long double ans(long double t,long double x, long double y);
 int Generate_x(long double* MATRIX, int N); //создаем узлы сетки
-int Get_Coef(long double *C, long double *C_2, int N, long double t); //получаем коэфициенты с_m
-long double dot_f_phi(int N, int i,  int j, long double t); //скалярное произведение f и phi_m
+int Get_Coef(long double *C, long double *C_2, int N, long double t, int T); //получаем коэфициенты с_m
+long double dot_f_phi(int N, int i,  int j, long double t, int T); //скалярное произведение f и phi_m
 long double dot_c_phi(long double *C, int  N, int i,  int j); //скалярное произведение C_1 и phi_m
-long double fourier(long double* C, int N, long double x, long double y); //значение ряда фурье в точке x
+long double fourier(long double* C, int N, long double x, long double y, int T); //значение ряда фурье в точке x
 int Write(long double* X,long double* Y, int N, long double* C,long double* C_2, int T); //выведем в файл X, f(X), fourier(X), |f(X) - fourier(X)|
-
+double lambda_n(int n, int N);
 //splot '1.txt' using 1:2:3 with points, '1.txt' using 1:2:4 with points
 
 /*
@@ -31,7 +31,7 @@ FILE(i) = sprintf("%d.txt",i)
 set xrange [0:1]
 set yrange [0:1]
 set zrange [-100:100]
-do for [i = 0:99]{
+do for [i = 0:39]{
     splot FILE(i) using 1:2:3 with points, FILE(i) using 1:2:4 with points
 }
 */
@@ -84,7 +84,7 @@ long double f(long double t,long double x, long double y)
 long double ans(long double t,long double x, long double y)
 {
     
-    return cos(5*M_PI*x/2.0)* cos(5*M_PI*y/2.0)*exp(-M_PI*M_PI*(2.5)*(2.5)*t); //*0.001
+    return cos(5*M_PI*x/2.0)* cos(5*M_PI*y/2.0)*exp(-M_PI*M_PI*(2.5)*(2.5)*t);
     //return cos(M_PI*x*(0.5))*cos(M_PI*0.5*y)*exp(-M_PI*M_PI*0.25*t);
 }
 
@@ -98,26 +98,32 @@ int Generate_x(long double* MATRIX, int N)
     return 1;
 }
 
-long double fourier(long double* C, int N, long double x, long double y)
+long double fourier(long double* C, int N, long double x, long double y, int T)
 {
     long double res = 0.0;
     for(int i = 0; i < N; i++)
     {
         for(int j = 0; j< N; j++)
         {
-            res += C[i*N + j] * cos(M_PI*(i+0.5)*x)* cos(M_PI*(j+0.5)*y);
+            res += C[i*N + j]/(lambda_n(i,N)+lambda_n(j,N) +1./(double)T) * cos(M_PI*(i+0.5)*x)* cos(M_PI*(j+0.5)*y);
         }
     }
     return res;
 }
 
-int Get_Coef(long double *C, long double *C_2, int N, long double t)
+double lambda_n(int n, int N)
+{
+    double h = (1/(double)N);
+    return 2*N*N*(1 - cos(M_PI*h*(n + 0.5)));// + b(h);
+}
+
+int Get_Coef(long double *C, long double *C_2, int N, long double t, int T)
 {
     for(int j = 0; j < N; j++)
     {   
         for(int i = 0; i < N; i++)
         {
-            C[N*i+j] = dot_f_phi(N,i,j,t)*2.0;
+            C[N*i+j] = dot_f_phi(N,i,j,t,T)*2.0;
         }
     }
 
@@ -133,14 +139,14 @@ int Get_Coef(long double *C, long double *C_2, int N, long double t)
 }
 
 
-long double dot_f_phi(int N, int i,  int j, long double t)
+long double dot_f_phi(int N, int i,  int j, long double t, int T)
 {
     long double res = 0.0;
     long double h = 1/(long double)N;
-    res += f(t, 0., j*h) * cos(0.) /2.0;
+    res += (f(t, 0., j*h)+ 1./(double)T *ans(t,0., j*h)) * cos(0.) /2.0;
     for(int k = 1; k < N; k++)
     {
-        res += f(t,k*h, j*h) * cos(M_PI*(i+0.5)*(k*h));
+        res += (f(t,k*h, j*h) + 1./(double)T *ans(t,k*h, j*h)) * cos(M_PI*(i+0.5)*(k*h));
     } 
     return res*h;
 }
@@ -165,8 +171,8 @@ int Write(long double* X,long double* Y, int N, long double* C,long double* C_2,
     double max = -1;
     for(int p = 0; p< T; p++)
     {
-        k+=(double)p/(double)T;
-        Get_Coef(C,C_2,N,k);
+        k+=1./(double)T ;
+        Get_Coef(C,C_2,N,k, T);
         ofstream out;
         out.open(to_string(p)+".txt");
         if(out.is_open())
@@ -180,22 +186,18 @@ int Write(long double* X,long double* Y, int N, long double* C,long double* C_2,
                 {
                     for(int l = 0; l<= 2; l++)
                     {
-                        //if(max < fabs(f(k,X[i]+l*h, Y[j]+l*h) - fourier(C,N,X[i]+l*h,Y[j]+l*h)))
-                        //{
-                        //    max = fabs(f(k,X[i]+l*h, Y[j]+l*h) - fourier(C,N,X[i]+l*h,Y[j]+l*h));
-                        //}
+                        out<<setw(25)<<X[i]+l*h<<setw(25)<<Y[j]+l*h<<setw(25)<<ans(k,X[i]+l*h, Y[j]+l*h)<<setw(25)<<fourier(C_2,N,X[i]+l*h,Y[j]+l*h, T)<<setw(25)<<fabs(ans(k,X[i]+l*h,Y[j]+l*h) - fourier(C_2,N,X[i]+l*h,Y[j]+l*h, T))<<endl;
 
-                        out<<setw(25)<<X[i]+l*h<<setw(25)<<Y[j]+l*h<<setw(25)<<f(k,X[i]+l*h, Y[j]+l*h)<<setw(25)<<fourier(C_2,N,X[i]+l*h,Y[j]+l*h)<<setw(25)<<fabs(f(k,X[i]+l*h,Y[j]+l*h) - fourier(C_2,N,X[i]+l*h,Y[j]+l*h))<<endl;
-
-                        if(fabs(f(k,X[i]+l*h, Y[j]+l*h) - fourier(C_2,N,X[i]+l*h,Y[j]+l*h)) > max)
+                        if(fabs(ans(k,X[i]+l*h, Y[j]+l*h) - fourier(C_2,N,X[i]+l*h,Y[j]+l*h, T)) > max)
                         {
-                            max = fabs(f(k,X[i]+l*h, Y[j]+l*h) - fourier(C_2,N,X[i]+l*h,Y[j]+l*h));
+                            max = fabs(ans(k,X[i]+l*h, Y[j]+l*h) - fourier(C_2,N,X[i]+l*h,Y[j]+l*h, T));
                         }
                     }
 
                }
             }
             out.close();
+
         }
 
     /*

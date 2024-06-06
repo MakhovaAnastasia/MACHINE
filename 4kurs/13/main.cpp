@@ -16,8 +16,8 @@ using namespace std;
 double u_0(double x);
 void Yavno(double** y, double h, int N, double t, int T);
 double b(double x);
-double f(double x, double y);
-double ans(double x,double y);
+double f(double t, double x);
+double ans(double t,double x);
 void Generate_d(double* d, int N, double t, double h);
 void Generate_f(double* F, double** y, int N, int n, double h, double t);
 void Progonka(int N, double* alpha, double* beta, double* c, double** y, double*f, double h, double t, int T);
@@ -158,24 +158,29 @@ void Yavno(double** y, double h, int N, double t, int T)
 
 double u_0(double x)
 {
-    double k = 2;
-    return cos(M_PI*(k+0.5)*x);
+    //double k = 2;
+    //return cos(M_PI*(k+0.5)*x);
+    return (x-1.)*exp(x);
 }
 
 double b(double x)
 {
-    return x;
+    x = x;
+    return 1;
+    //return x;
 }
 
-double f(double x, double y)
+double f(double t, double x)
 {
-    return b(y)*ans(x,y);
+    //return b(y)*ans(x,y);
+    return (-((x-1.)*exp(x))*exp(-t) - exp(x)*(x +1.)*exp(-t)) +1.*((x-1.)*exp(x))*exp(-t);
 }
 
-double ans(double x,double y)
+double ans(double t,double x)
 {
-    double k = 2;
-    return cos(M_PI*(k+0.5)*y)*exp(-M_PI*M_PI*(k+0.5)*(k+0.5)*x);
+    //double k = 2;
+    //return cos(M_PI*(k+0.5)*y)*exp(-M_PI*M_PI*(k+0.5)*(k+0.5)*x);
+    return ((x-1.)*exp(x))*exp(-t);
 }
 
 void Generate_d(double* d, int N, double t, double h)
@@ -207,6 +212,7 @@ void Progonka(int N, double* alpha, double* beta, double* c, double** y, double*
     double b = 1./(h*h);
     double b0 = 2./(h*h);
     double aN = 0.;
+
 
     alpha[0] = 0;
     beta[0] = 0;
@@ -240,9 +246,35 @@ void Progonka(int N, double* alpha, double* beta, double* c, double** y, double*
             y[n+1][i] = alpha[i+1]*y[n+1][i+1] + beta[i+1];
         
         }
+        for(int i = N - 1; i > -1;i--)
+        {
+            y[n+1][i] = alpha[i+1]*y[n+1][i+1] + beta[i+1];
+
+        }
+        double nevyaz = 0.;
+        for(int i = 0; i<=N; i++)
+        {
+            if(i== 0)
+            {
+                nevyaz += y[n+1][0]*c[0] -b0*y[n+1][1] - f[0];
+                continue;
+            }
+            if(i == N)
+            {
+                nevyaz += y[n+1][N]*c[N] - aN*y[n+1][N-1] - f[N];
+                continue;
+            }
+            nevyaz += y[n+1][i]*c[i] -b*y[n+1][i+1] - a*y[n+1][i-1] - f[i];
+
+
+        }
+        //cout<< "Невязка = "<<nevyaz<<endl;
     }
+
     return;
 }
+
+
 
 
 
