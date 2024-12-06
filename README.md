@@ -1,5 +1,5 @@
 # MACHINE
-My 3rd and 4th year C/C++ homeworks
+My 3rd and 4th year C/C++ homeworks (numerical metods)
 
 
 
