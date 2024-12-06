@@ -1,5 +1,5 @@
 # MACHINE
-My homework on C/C++ in 1st-3rd year of study
+My homeworks on C/C++ in 1st-3rd year of study
 
 
 
